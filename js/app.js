@@ -95,26 +95,38 @@ async function renderWeatherApplet() {
 }
 
 // ── APP INITIALIZATION ──
+// Each feature initializes inside its own try/catch, so if one widget
+// throws (bad data, missing element...) the rest of the portal still works.
+function runSafe(label, fn) {
+  try {
+    fn();
+  } catch (e) {
+    console.error(`[init] ${label} failed:`, e);
+  }
+}
+
 function init() {
-  loadLocalDatabase();
-  loadQuickTasks();
-  runRealTimeClock();
-  updateGreeting();
-  populateReviewSelect();
-  renderMascotSpeech();
-  renderTodayClasses();
-  renderBringReminder();
-  renderWeatherApplet();
-  renderExams();
-  renderEvents();
-  renderBlockGrid();
-  renderFullSchedule();
-  renderReviews();
-  updateNextClassTimer();
+  runSafe('local database', loadLocalDatabase);
+  runSafe('quick tasks', loadQuickTasks);
+  runSafe('clock', runRealTimeClock);
+  runSafe('greeting', updateGreeting);
+  runSafe('review select', populateReviewSelect);
+  runSafe('mascot speech', renderMascotSpeech);
+  runSafe('today classes', renderTodayClasses);
+  runSafe('bring reminder', renderBringReminder);
+  runSafe('weather', renderWeatherApplet);
+  runSafe('exams', renderExams);
+  runSafe('events', renderEvents);
+  runSafe('class grid', renderBlockGrid);
+  runSafe('full schedule', renderFullSchedule);
+  runSafe('reviews', renderReviews);
+  runSafe('next class timer', updateNextClassTimer);
 
-  document.getElementById('class-badge-count').textContent = ALL_CLASSES.length;
+  runSafe('class badge', () => {
+    document.getElementById('class-badge-count').textContent = ALL_CLASSES.length;
+  });
 
-  if (typeof initOrbs === 'function') initOrbs();
+  if (typeof initOrbs === 'function') runSafe('mascot orbs', initOrbs);
 }
 
 if (studentId) {

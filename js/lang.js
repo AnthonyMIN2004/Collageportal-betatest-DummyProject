@@ -86,8 +86,12 @@ function toggleLang() {
   };
 
   setTxt("gate-label", s["gate-label"]);
-  setPlaceholder("task-input", s["task-input-placeholder"]);
+  // Task input + title exist on both desktop and mobile
+  document.querySelectorAll('[data-role="task-input"]').forEach((el) => {
+    el.placeholder = s["task-input-placeholder"];
+  });
   setTxt("tasks-title", s["tasks-title"]);
+  setTxt("tasks-title-mobile", s["tasks-title"]);
   setTxt("today-classes-title", s["today-classes-title"]);
   setTxt("today-classes-subtitle", s["today-classes-subtitle"]);
   setTxt("view-grid-lbl", s["view-grid-lbl"]);

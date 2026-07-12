@@ -322,8 +322,6 @@
     class="min-h-screen text-slate-800 font-sans antialiased selection:bg-brand-100 selection:text-brand-600"
   >
     <!-- ── MODAL OVERLAYS ── -->
-    <!-- ADD this inside the gate div, at the very top -->
-
     <div
       id="custom-alert-overlay"
       class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300"
@@ -602,14 +600,14 @@
               >
               <span
                 class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-full"
-                id="task-completed-ratio"
+                data-role="task-ratio"
                 >0/0</span
               >
             </div>
             <div class="flex gap-1.5 mb-3">
               <input
                 type="text"
-                id="task-input"
+                data-role="task-input"
                 placeholder="New quick task..."
                 class="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50"
               />
@@ -622,7 +620,7 @@
             </div>
             <div
               class="max-h-[140px] overflow-y-auto space-y-1.5 custom-scroll pr-1"
-              id="quick-tasks-list"
+              data-role="task-list"
             ></div>
           </div>
         </div>
@@ -833,14 +831,14 @@
                 >
                 <span
                   class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-full"
-                  id="task-completed-ratio"
+                  data-role="task-ratio"
                   >0/0</span
                 >
               </div>
               <div class="flex gap-1.5 mb-3">
                 <input
                   type="text"
-                  id="task-input"
+                  data-role="task-input"
                   placeholder="New quick task..."
                   class="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50"
                 />
@@ -853,7 +851,7 @@
               </div>
               <div
                 class="max-h-[150px] overflow-y-auto space-y-1.5 custom-scroll"
-                id="quick-tasks-list"
+                data-role="task-list"
               ></div>
             </div>
 

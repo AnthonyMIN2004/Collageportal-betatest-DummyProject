@@ -1,5 +1,7 @@
 // ── COLLEGIATE PORTAL | TASKS.JS ──
-// Quick tasks sidebar checklist
+// Quick tasks checklist. The same list is shown in two places
+// (desktop sidebar + mobile card), so we render into every element
+// tagged with data-role instead of relying on a single id.
 
 let quickTasks = [];
 
@@ -8,6 +10,7 @@ function loadQuickTasks() {
   if (saved) {
     quickTasks = JSON.parse(saved);
   } else {
+    // First visit: give the student a few sample tasks so the card isn't empty
     quickTasks = [
       { id: '1', text: 'Finish DX社会学 homework', done: false },
       { id: '2', text: 'Review Python API connection codes', done: false },
@@ -23,13 +26,15 @@ function saveQuickTasks() {
 }
 
 function addQuickTask() {
-  const input = document.getElementById('task-input');
+  // Two inputs exist (desktop + mobile) — take whichever one has text
+  const input = [...document.querySelectorAll('[data-role="task-input"]')]
+    .find(i => i.value.trim());
+  if (!input) return;
   const text = input.value.trim();
-  if (!text) return;
   quickTasks.push({ id: Date.now().toString(), text, done: false });
   input.value = '';
   saveQuickTasks();
-  showToast(lang === 'en' ? 'Quick task added!' : 'タスクを追加しました！');
+  showToast(lang === 'en' ? 'Task added!' : 'タスクを追加しました！');
 }
 
 function toggleQuickTask(id) {
@@ -44,28 +49,29 @@ function deleteQuickTask(id) {
 }
 
 function renderQuickTasks() {
-  const listEl = document.getElementById('quick-tasks-list');
-  listEl.innerHTML = '';
-  let completedCount = 0;
+  const completedCount = quickTasks.filter(t => t.done).length;
 
-  quickTasks.forEach(task => {
-    if (task.done) completedCount++;
-    const card = document.createElement('div');
-    card.className = 'flex items-center justify-between gap-2 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200/60 transition-colors';
-    card.innerHTML = `
+  const cardsHtml = quickTasks.map(task => `
+    <div class="flex items-center justify-between gap-2 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200/60 transition-colors">
       <div class="flex items-center gap-2 min-w-0">
         <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleQuickTask('${task.id}')" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 w-3 h-3">
         <span class="text-[10px] font-bold ${task.done ? 'line-through text-slate-400' : 'text-slate-700'} truncate">${escHtml(task.text)}</span>
       </div>
       <button onclick="deleteQuickTask('${task.id}')" class="text-slate-400 hover:text-rose-500 text-[10px] font-black leading-none p-1 transition-colors">✕</button>
-    `;
-    listEl.appendChild(card);
-  });
+    </div>
+  `).join('');
 
-  document.getElementById('task-completed-ratio').textContent = `${completedCount}/${quickTasks.length}`;
+  document.querySelectorAll('[data-role="task-list"]').forEach(el => {
+    el.innerHTML = cardsHtml;
+  });
+  document.querySelectorAll('[data-role="task-ratio"]').forEach(el => {
+    el.textContent = `${completedCount}/${quickTasks.length}`;
+  });
 }
 
-// Allow Enter key to add task
-document.getElementById('task-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addQuickTask();
+// Enter key adds the task, from either input
+document.querySelectorAll('[data-role="task-input"]').forEach(input => {
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') addQuickTask();
+  });
 });

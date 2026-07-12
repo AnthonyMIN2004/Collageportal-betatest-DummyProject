@@ -1,11 +1,12 @@
-# ── ROUTE | POST /login ──
+# ── ROUTE | POST /login + POST /my/password ──
 # Authenticates a student/admin and returns a JWT. Includes simple
 # in-memory rate limiting to slow brute-force attempts.
+# Also lets a logged-in user (student or admin) change their own password.
 
 import time
 
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field
 
 import auth
 from database import get_db
@@ -57,3 +58,28 @@ def login(body: LoginBody, request: Request):
         "student_id": row["id"],
         "is_admin": bool(row["is_admin"]),
     }
+
+
+class PasswordBody(BaseModel):
+    old_password: str
+    new_password: str = Field(..., min_length=4, max_length=100)
+
+
+@router.post("/my/password")
+def change_password(body: PasswordBody, user: dict = Depends(auth.get_current_user)):
+    """Change your own password. Requires the current one — a stolen
+    token alone isn't enough to lock someone out of their account."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT password_hash FROM users WHERE id = ?", (user["sub"],)
+    ).fetchone()
+    if not row or not auth.verify_password(body.old_password, row["password_hash"]):
+        conn.close()
+        raise HTTPException(status_code=401, detail="現在のパスワードが正しくありません")
+    conn.execute(
+        "UPDATE users SET password_hash = ? WHERE id = ?",
+        (auth.hash_password(body.new_password), user["sub"]),
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True}

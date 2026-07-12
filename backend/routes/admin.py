@@ -3,6 +3,7 @@
 # 403, no/invalid token gets 401. Only an admin token passes.
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 import auth
 from database import get_db
@@ -27,6 +28,28 @@ def stats():
         out[table] = conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"]
     conn.close()
     return out
+
+
+class ResetPasswordBody(BaseModel):
+    new_password: str = Field(..., min_length=4, max_length=100)
+
+
+@router.post("/users/{user_id}/password")
+def reset_password(user_id: str, body: ResetPasswordBody):
+    """Admin reset for a student who forgot their password.
+    Passwords are bcrypt-hashed — nobody can read the old one, only replace it."""
+    conn = get_db()
+    row = conn.execute("SELECT id FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+    conn.execute(
+        "UPDATE users SET password_hash = ? WHERE id = ?",
+        (auth.hash_password(body.new_password), user_id),
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True}
 
 
 @router.delete("/reviews/{review_id}")

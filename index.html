@@ -107,6 +107,86 @@
       </div>
     </div>
 
+    <!-- Password change (+ admin reset) modal. Hidden until opened from the sidebar. -->
+    <div
+      id="pw-modal"
+      class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto"
+      >
+        <div
+          class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-xl"
+        >
+          🔑
+        </div>
+        <h3 class="text-base font-extrabold text-slate-900">
+          <span class="lbl-txt" data-en="Change Password" data-ja="パスワード変更">Change Password</span>
+        </h3>
+        <div>
+          <label class="text-[10px] font-black text-slate-400 block uppercase tracking-widest mb-1">
+            <span class="lbl-txt" data-en="Current Password" data-ja="現在のパスワード">Current Password</span>
+          </label>
+          <input
+            type="password"
+            id="pw-old"
+            autocomplete="current-password"
+            class="w-full p-2.5 rounded-xl border border-slate-200 outline-none text-xs font-semibold bg-slate-50 focus:border-brand-500"
+          />
+        </div>
+        <div>
+          <label class="text-[10px] font-black text-slate-400 block uppercase tracking-widest mb-1">
+            <span class="lbl-txt" data-en="New Password" data-ja="新しいパスワード">New Password</span>
+          </label>
+          <input
+            type="password"
+            id="pw-new"
+            autocomplete="new-password"
+            class="w-full p-2.5 rounded-xl border border-slate-200 outline-none text-xs font-semibold bg-slate-50 focus:border-brand-500"
+          />
+        </div>
+        <button
+          onclick="changeOwnPassword()"
+          class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold transition-all active:scale-95 text-xs"
+        >
+          <span class="lbl-txt" data-en="Update Password" data-ja="変更する">Update Password</span>
+        </button>
+
+        <!-- Admin only: reset a student's password (shown by openPasswordModal) -->
+        <div id="pw-admin-reset" class="hidden border-t border-slate-100 pt-4 space-y-3">
+          <h4 class="text-xs font-extrabold text-slate-900">
+            <span class="lbl-txt" data-en="Reset a Student's Password (Admin)" data-ja="学生パスワードのリセット（管理者）">Reset a Student's Password (Admin)</span>
+          </h4>
+          <input
+            type="text"
+            id="pw-reset-sid"
+            placeholder="25501"
+            class="w-full p-2.5 rounded-xl border border-slate-200 outline-none text-xs font-semibold bg-slate-50 focus:border-brand-500"
+          />
+          <input
+            type="password"
+            id="pw-reset-new"
+            autocomplete="off"
+            placeholder="New password"
+            class="w-full p-2.5 rounded-xl border border-slate-200 outline-none text-xs font-semibold bg-slate-50 focus:border-brand-500"
+          />
+          <button
+            onclick="adminResetPassword()"
+            class="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-all active:scale-95 text-xs"
+          >
+            <span class="lbl-txt" data-en="Reset Password" data-ja="リセットする">Reset Password</span>
+          </button>
+        </div>
+
+        <button
+          onclick="closePasswordModal()"
+          class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all text-xs active:scale-95"
+        >
+          <span class="lbl-txt" data-en="Close" data-ja="閉じる">Close</span>
+        </button>
+      </div>
+    </div>
+
     <div
       id="toast-container"
       class="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] flex flex-col gap-2 pointer-events-none max-w-xs sm:max-w-md w-full px-4"
@@ -309,6 +389,31 @@
                   ></span
                 >
               </button>
+
+              <!-- Account actions -->
+              <div class="pt-2 mt-2 border-t border-slate-100 space-y-1">
+                <button
+                  onclick="openPasswordModal()"
+                  class="flex items-center gap-3 w-full p-3 rounded-xl font-bold text-xs text-left transition-all text-slate-600 hover:bg-slate-50"
+                >
+                  <span class="text-base">🔑</span
+                  ><span
+                    class="lbl-txt"
+                    data-en="Change Password"
+                    data-ja="パスワード変更"
+                    >Change Password</span
+                  >
+                </button>
+                <button
+                  onclick="logout()"
+                  class="flex items-center gap-3 w-full p-3 rounded-xl font-bold text-xs text-left transition-all text-slate-600 hover:bg-rose-50 hover:text-rose-600"
+                >
+                  <span class="text-base">🚪</span
+                  ><span class="lbl-txt" data-en="Log Out" data-ja="ログアウト"
+                    >Log Out</span
+                  >
+                </button>
+              </div>
             </nav>
           </div>
 

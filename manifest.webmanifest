@@ -1,0 +1,16 @@
+{
+  "name": "Kiritan Collegiate Portal",
+  "short_name": "Kiritan Portal",
+  "description": "Student portal for Osaka Christian College — schedule, tasks, reviews and more.",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

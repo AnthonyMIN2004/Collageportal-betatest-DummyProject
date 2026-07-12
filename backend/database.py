@@ -100,15 +100,71 @@ def init_db():
             code  TEXT NOT NULL,
             ts    INTEGER NOT NULL
         );
+
+        -- Curriculum lives in the DB so admin can edit it from the portal.
+        -- (Was hardcoded in seed_data.py — that's now just the initial seed.)
+        CREATE TABLE IF NOT EXISTS class_meetings (
+            id     INTEGER PRIMARY KEY AUTOINCREMENT,
+            day    TEXT NOT NULL,      -- Mon..Fri
+            period INTEGER NOT NULL,   -- 1..5
+            name   TEXT NOT NULL,
+            room   TEXT NOT NULL DEFAULT 'TBD',
+            type   TEXT NOT NULL DEFAULT 'general'
+        );
+
+        CREATE TABLE IF NOT EXISTS class_info (
+            name TEXT PRIMARY KEY,
+            icon TEXT NOT NULL DEFAULT '📚',
+            desc TEXT NOT NULL DEFAULT ''
+        );
+
+        CREATE TABLE IF NOT EXISTS bring_items (
+            id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            class TEXT NOT NULL,
+            icon  TEXT NOT NULL DEFAULT '📓',
+            item  TEXT NOT NULL
+        );
         """
     )
 
     _seed_users(cur)
     _seed_exams(cur)
     _seed_events(cur)
+    _seed_curriculum(cur)
 
     conn.commit()
     conn.close()
+
+
+def _seed_curriculum(cur):
+    # First run only: copy the timetable/class info/bring items from
+    # seed_data into the DB. After that, the DB is the source of truth
+    # and admin edits it through /admin routes.
+    cur.execute("SELECT COUNT(*) AS n FROM class_meetings")
+    if cur.fetchone()["n"] == 0:
+        for day, meetings in seed_data.SCHEDULE.items():
+            for m in meetings:
+                cur.execute(
+                    "INSERT INTO class_meetings (day, period, name, room, type) VALUES (?, ?, ?, ?, ?)",
+                    (day, m["period"], m["name"], m["room"], m["type"]),
+                )
+
+    cur.execute("SELECT COUNT(*) AS n FROM class_info")
+    if cur.fetchone()["n"] == 0:
+        for name, info in seed_data.CLASS_INFO.items():
+            cur.execute(
+                "INSERT INTO class_info (name, icon, desc) VALUES (?, ?, ?)",
+                (name, info["icon"], info["desc"]),
+            )
+
+    cur.execute("SELECT COUNT(*) AS n FROM bring_items")
+    if cur.fetchone()["n"] == 0:
+        for name, items in seed_data.CLASS_BRING_ITEMS.items():
+            for it in items:
+                cur.execute(
+                    "INSERT INTO bring_items (class, icon, item) VALUES (?, ?, ?)",
+                    (name, it["icon"], it["item"]),
+                )
 
 
 def _seed_users(cur):

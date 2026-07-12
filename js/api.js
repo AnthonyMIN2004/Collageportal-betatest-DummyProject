@@ -6,10 +6,14 @@
 //             js/data.js + localStorage so the app stays usable.
 
 const API_BASE = (() => {
-  // Opened as a local file or via a dev server → talk to local uvicorn.
+  // Opened as a local file → talk to local uvicorn.
+  // Dev server (PC or phone on the same wifi) → uvicorn on whatever host served the page.
   // Served by Nginx on the Pi → same origin under /api (see deploy/nginx.conf).
-  if (location.protocol === 'file:' || ['5500', '8080', '3000'].includes(location.port)) {
+  if (location.protocol === 'file:') {
     return 'http://127.0.0.1:8000';
+  }
+  if (['5500', '8080', '3000'].includes(location.port)) {
+    return 'http://' + location.hostname + ':8000';
   }
   return '/api';
 })();
@@ -55,10 +59,15 @@ async function syncFromServer() {
   });
   EXAMS.sort((a, b) => a.date.localeCompare(b.date));
 
-  // Backend stores ISO dates; the events card wants "JUN / 20" style
+  EVENTS = mapEvents(events);
+}
+
+// Backend stores ISO dates; the events card wants "JUN / 20" style.
+// Keeps the id so admin can delete events from the dashboard.
+function mapEvents(events) {
   const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-  EVENTS = events.map(e => {
+  return events.map(e => {
     const d = new Date(e.date);
-    return { month: MONTHS[d.getMonth()], day: String(d.getDate()), name: e.name, detail: e.detail || '' };
+    return { id: e.id, month: MONTHS[d.getMonth()], day: String(d.getDate()), name: e.name, detail: e.detail || '' };
   });
 }

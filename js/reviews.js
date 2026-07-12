@@ -47,6 +47,9 @@ function renderReviews() {
     : d === 'hard' ? (lang === 'en' ? 'Hard' : '難しい')
     : (lang === 'en' ? 'Normal' : '普通');
 
+  // Admin moderation: delete inappropriate reviews (server checks the token too)
+  const canModerate = isAdmin && API.online;
+
   container.innerHTML = reviews.map(r => `
     <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-sm space-y-3">
       <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -59,10 +62,30 @@ function renderReviews() {
       <p class="text-xs text-slate-600 font-semibold leading-relaxed">${escHtml(r.body || '')}</p>
       <div class="flex justify-between items-center pt-2 border-t border-slate-50">
         <span class="bg-brand-50 text-brand-600 text-[9px] font-black px-2 py-0.5 rounded-md uppercase">${lang === 'en' ? 'Student Review' : '学生レビュー'}</span>
-        <span class="text-[9px] font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">${diffLabel(r.diff)}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-[9px] font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">${diffLabel(r.diff)}</span>
+          ${canModerate && r.id != null ? `<button onclick="adminDeleteReview(${r.id})" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-md text-[9px] font-black transition-all">${lang === 'en' ? 'Delete' : '削除'}</button>` : ''}
+        </div>
       </div>
     </div>
   `).join('');
+}
+
+async function adminDeleteReview(id) {
+  const allow = await showCustomConfirm(
+    lang === 'en' ? 'Delete Review' : 'レビューを削除',
+    lang === 'en' ? 'Remove this review for everyone?' : 'このレビューを全員から削除しますか？',
+    lang === 'en' ? 'Delete' : '削除する',
+    lang === 'en' ? 'Cancel' : 'キャンセル'
+  );
+  if (!allow) return;
+  try {
+    await apiFetch('/admin/reviews/' + id, { method: 'DELETE' });
+    await loadReviews();
+    showToast(lang === 'en' ? 'Review deleted.' : 'レビューを削除しました。');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
 }
 
 async function postReview() {

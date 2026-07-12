@@ -220,6 +220,8 @@ function renderExams() {
 
 function renderEvents() {
   const list = document.getElementById("events-feed");
+  const canModerate = isAdmin && API.online;
+
   list.innerHTML = EVENTS.map(
     (e) => `
     <div class="flex items-start gap-3">
@@ -227,11 +229,73 @@ function renderEvents() {
         <span class="text-[8px] tracking-wider uppercase block">${e.month}</span>
         <span class="text-sm font-black leading-none block mt-0.5">${e.day}</span>
       </div>
-      <div class="min-w-0">
-        <h4 class="text-xs font-black text-slate-800 truncate">${e.name}</h4>
-        <p class="text-[10px] text-slate-400 font-bold mt-0.5 truncate">${e.detail}</p>
+      <div class="min-w-0 flex-1">
+        <h4 class="text-xs font-black text-slate-800 truncate">${escHtml(e.name)}</h4>
+        <p class="text-[10px] text-slate-400 font-bold mt-0.5 truncate">${escHtml(e.detail)}</p>
       </div>
+      ${canModerate && e.id != null ? `<button onclick="adminDeleteEvent(${e.id})" title="Delete event" class="text-rose-400 hover:text-rose-600 font-black text-xs px-1.5 transition-all">✕</button>` : ''}
     </div>
   `,
   ).join("");
+
+  // Admin: quick add form at the bottom of the events card
+  if (canModerate) {
+    list.innerHTML += `
+      <div class="border-t border-slate-100 pt-3 space-y-2">
+        <input type="text" id="ev-name" placeholder="${lang === 'en' ? 'Event name' : 'イベント名'}" class="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+        <div class="flex gap-2">
+          <input type="date" id="ev-date" class="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+          <button onclick="adminAddEvent()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-black text-xs transition-all">＋</button>
+        </div>
+        <input type="text" id="ev-detail" placeholder="${lang === 'en' ? 'Detail (optional)' : '詳細（任意）'}" class="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+      </div>
+    `;
+  }
+}
+
+// Re-fetch just the events list (after an admin add/delete)
+async function reloadEvents() {
+  try {
+    EVENTS = mapEvents(await apiFetch('/share/events'));
+    renderEvents();
+  } catch (e) {
+    console.warn('Events reload failed:', e);
+  }
+}
+
+async function adminAddEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  const date = document.getElementById('ev-date').value;
+  const detail = document.getElementById('ev-detail').value.trim();
+  if (!name || !date) {
+    showToast(lang === 'en' ? '⚠️ Event needs a name and a date.' : '⚠️ イベント名と日付を入力してください。');
+    return;
+  }
+  try {
+    await apiFetch('/share/events', {
+      method: 'POST',
+      body: JSON.stringify({ name, date, detail: detail || null }),
+    });
+    await reloadEvents();
+    showToast(lang === 'en' ? '📢 Event added!' : '📢 イベントを追加しました！');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+async function adminDeleteEvent(id) {
+  const allow = await showCustomConfirm(
+    lang === 'en' ? 'Delete Event' : 'イベントを削除',
+    lang === 'en' ? 'Remove this event from the campus feed?' : 'このイベントを削除しますか？',
+    lang === 'en' ? 'Delete' : '削除する',
+    lang === 'en' ? 'Cancel' : 'キャンセル'
+  );
+  if (!allow) return;
+  try {
+    await apiFetch('/share/events/' + id, { method: 'DELETE' });
+    await reloadEvents();
+    showToast(lang === 'en' ? 'Event deleted.' : 'イベントを削除しました。');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
 }

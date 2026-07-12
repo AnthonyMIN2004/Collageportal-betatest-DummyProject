@@ -38,6 +38,11 @@ app.add_middleware(
 @app.on_event("startup")
 def _startup():
     init_db()
+    # Loud reminder so nobody deploys with the dev secret by accident
+    if os.environ.get("PORTAL_SECRET") is None:
+        # plain ASCII on purpose — emoji crashes on Windows cp932 consoles
+        print("WARNING: PORTAL_SECRET is not set, using the dev default. "
+              "Set a real secret before exposing this server to the internet!")
 
 
 @app.get("/health")

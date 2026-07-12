@@ -4,7 +4,7 @@
 
 import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from database import get_db
@@ -13,10 +13,12 @@ router = APIRouter(prefix="/share/reviews")
 
 
 class ReviewBody(BaseModel):
-    class_name: str = Field(..., alias="class")
-    stars: int = 0
-    difficulty: str | None = None
-    body: str
+    # Field limits double as input validation: anything oversized or
+    # out of range is rejected by FastAPI with a 422 before we touch the DB.
+    class_name: str = Field(..., alias="class", max_length=100)
+    stars: int = Field(0, ge=0, le=5)
+    difficulty: str | None = Field(None, max_length=20)
+    body: str = Field(..., max_length=2000)
 
     class Config:
         populate_by_name = True
@@ -36,7 +38,8 @@ def list_reviews():
 def create_review(body: ReviewBody):
     text = body.body.strip()
     if not text:
-        return {"ok": False, "error": "Review body is required"}
+        # 400, not a 200-with-error — clients rely on the status code
+        raise HTTPException(status_code=400, detail="Review body is required")
     conn = get_db()
     cur = conn.execute(
         "INSERT INTO reviews (class, stars, difficulty, body, ts) VALUES (?, ?, ?, ?, ?)",

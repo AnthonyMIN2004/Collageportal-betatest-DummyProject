@@ -3,7 +3,7 @@
 # to admins so students can't spam the shared calendar.
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import auth
 from database import get_db
@@ -12,9 +12,9 @@ router = APIRouter(prefix="/share/events")
 
 
 class EventBody(BaseModel):
-    name: str
-    date: str
-    detail: str | None = None
+    name: str = Field(..., min_length=1, max_length=200)
+    date: str = Field(..., max_length=10)  # ISO "YYYY-MM-DD"
+    detail: str | None = Field(None, max_length=500)
 
 
 @router.get("")

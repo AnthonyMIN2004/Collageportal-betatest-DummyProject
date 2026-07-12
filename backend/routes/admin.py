@@ -1,6 +1,6 @@
 # ── ROUTE | /admin/* (ADMIN ONLY) ──
-# Every route here depends on get_current_admin, so a normal student cant get in beside admin
-# token (or no token) is rejected with 403/401.
+# Every route here depends on get_current_admin: a student token gets
+# 403, no/invalid token gets 401. Only an admin token passes.
 
 from fastapi import APIRouter, Depends, HTTPException
 

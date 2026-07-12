@@ -3,7 +3,7 @@
 # so a student can only ever see or change their own tasks.
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import auth
 from database import get_db
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/my/tasks")
 
 
 class TaskBody(BaseModel):
-    content: str
+    content: str = Field(..., max_length=500)
 
 
 @router.get("")

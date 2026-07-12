@@ -5,7 +5,7 @@
 //   - /api/ requests  → never cached, they must be fresh
 // Bump CACHE_VERSION whenever you ship changes so old caches get purged.
 
-const CACHE_VERSION = 'kiritan-v2';
+const CACHE_VERSION = 'kiritan-v3';
 
 const SHELL_FILES = [
   './',
@@ -29,8 +29,12 @@ const SHELL_FILES = [
 ];
 
 self.addEventListener('install', (event) => {
+  // cache: 'reload' skips the browser's HTTP cache — otherwise a stale
+  // 304 can sneak an OLD file into a NEW cache version and undo the bump.
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(SHELL_FILES))
+    caches.open(CACHE_VERSION).then((cache) =>
+      cache.addAll(SHELL_FILES.map((u) => new Request(u, { cache: 'reload' })))
+    )
   );
   self.skipWaiting();
 });
@@ -59,7 +63,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.open(CACHE_VERSION).then(async (cache) => {
       const cached = await cache.match(event.request);
-      const fresh = fetch(event.request)
+      // no-cache = always revalidate with the server, never trust the
+      // HTTP cache — that's how stale files were surviving version bumps
+      const fresh = fetch(event.request, { cache: 'no-cache' })
         .then((res) => {
           if (res.ok) cache.put(event.request, res.clone());
           return res;

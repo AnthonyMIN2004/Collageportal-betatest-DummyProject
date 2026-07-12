@@ -1,0 +1,15 @@
+# Node / frontend build deps
+node_modules/
+
+# Python backend
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend/venv/
+*.pyc
+
+# SQLite database (generated at runtime — don't commit student data)
+backend/portal.db
+
+# Env / secrets
+.env

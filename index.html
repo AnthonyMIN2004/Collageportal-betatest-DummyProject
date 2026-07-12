@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Collegiate Portal | Osaka Christian College</title>
+    <meta name="theme-color" content="#1E3A8A" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-color: #f8fafc;
+      }
+      .custom-scroll::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+
+      /* ── GLASS ORB STYLES ── */
+      .orb-scene {
+        position: relative;
+        width: 340px;
+        height: 340px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .orb-scene.orb-sm {
+        width: 80px;
+        height: 80px;
+      }
+      .orb-scene.orb-xs {
+        width: 56px;
+        height: 56px;
+      }
+      .orb-scene.orb-md {
+        width: 110px;
+        height: 110px;
+      }
+
+      .orb-glow-ring {
+        position: absolute;
+        width: 340px;
+        height: 340px;
+        border-radius: 50%;
+        background: transparent;
+        box-shadow:
+          0 0 60px 18px rgba(120, 60, 255, 0.18),
+          0 0 120px 40px rgba(80, 120, 255, 0.09);
+        animation: glowPulse 3.5s ease-in-out infinite alternate;
+      }
+      .orb-scene.orb-sm .orb-glow-ring {
+        width: 80px;
+        height: 80px;
+        box-shadow:
+          0 0 14px 4px rgba(120, 60, 255, 0.18),
+          0 0 28px 9px rgba(80, 120, 255, 0.09);
+      }
+      .orb-scene.orb-md .orb-glow-ring {
+        width: 110px;
+        height: 110px;
+        box-shadow:
+          0 0 20px 6px rgba(120, 60, 255, 0.18),
+          0 0 40px 13px rgba(80, 120, 255, 0.09);
+      }
+      .orb-scene.orb-xs .orb-glow-ring {
+        width: 56px;
+        height: 56px;
+        box-shadow:
+          0 0 10px 3px rgba(120, 60, 255, 0.18),
+          0 0 20px 6px rgba(80, 120, 255, 0.09);
+      }
+      @keyframes glowPulse {
+        from {
+          box-shadow:
+            0 0 55px 15px rgba(120, 60, 255, 0.16),
+            0 0 110px 38px rgba(80, 120, 255, 0.07);
+        }
+        to {
+          box-shadow:
+            0 0 75px 28px rgba(160, 80, 255, 0.28),
+            0 0 140px 55px rgba(100, 160, 255, 0.13);
+        }
+      }
+
+      .orb-sphere {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        animation:
+          morph 9s ease-in-out infinite alternate,
+          spin 22s linear infinite,
+          breathe 4s ease-in-out infinite alternate;
+        z-index: 2;
+      }
+      .orb-scene.orb-sm .orb-sphere {
+        width: 67px;
+        height: 67px;
+      }
+      .orb-scene.orb-md .orb-sphere {
+        width: 92px;
+        height: 92px;
+      }
+      .orb-scene.orb-xs .orb-sphere {
+        width: 47px;
+        height: 47px;
+      }
+
+      .orb-sphere::before,
+      .orb-sphere::after,
+      .orb-sphere .orb-inner1,
+      .orb-sphere .orb-inner2 {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+      }
+
+      .orb-sphere::before {
+        background: radial-gradient(
+          circle at 60% 65%,
+          #ff8c00 0%,
+          #ff3a1e 28%,
+          #d42090 55%,
+          #6a10c8 80%,
+          #1e0070 100%
+        );
+        z-index: 1;
+      }
+
+      .orb-sphere::after {
+        background: radial-gradient(
+          circle at 35% 35%,
+          rgba(72, 210, 255, 0.92) 0%,
+          rgba(40, 130, 255, 0.72) 35%,
+          rgba(60, 40, 230, 0.38) 65%,
+          transparent 100%
+        );
+        z-index: 2;
+        animation: blobDrift 7s ease-in-out infinite alternate;
+      }
+      @keyframes blobDrift {
+        0% {
+          transform: translate(0px, 0px);
+        }
+        33% {
+          transform: translate(14px, -10px);
+        }
+        66% {
+          transform: translate(-10px, 12px);
+        }
+        100% {
+          transform: translate(8px, 6px);
+        }
+      }
+
+      .orb-sphere .orb-inner1 {
+        background: radial-gradient(
+          circle at 55% 40%,
+          rgba(190, 100, 255, 0.7) 0%,
+          rgba(140, 50, 255, 0.35) 45%,
+          transparent 75%
+        );
+        z-index: 3;
+        animation: blobDrift2 10s ease-in-out infinite alternate;
+      }
+      @keyframes blobDrift2 {
+        0% {
+          transform: translate(0px, 0px);
+        }
+        50% {
+          transform: translate(-12px, 8px);
+        }
+        100% {
+          transform: translate(10px, -14px);
+        }
+      }
+
+      .orb-sphere .orb-inner2 {
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.07) 0%,
+          rgba(200, 230, 255, 0.04) 45%,
+          rgba(140, 80, 255, 0.1) 80%,
+          rgba(80, 40, 255, 0.25) 100%
+        );
+        z-index: 4;
+        box-shadow: inset 0 0 40px 14px rgba(0, 0, 10, 0.45);
+      }
+
+      .orb-sphere .orb-gloss {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        z-index: 5;
+        background:
+          radial-gradient(
+            ellipse 58% 48% at 32% 26%,
+            rgba(255, 255, 255, 0.36) 0%,
+            rgba(255, 255, 255, 0.12) 40%,
+            transparent 75%
+          ),
+          radial-gradient(
+            ellipse 14% 10% at 24% 18%,
+            rgba(255, 255, 255, 0.92) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 100%
+          ),
+          radial-gradient(
+            ellipse 40% 28% at 58% 82%,
+            rgba(240, 180, 255, 0.18) 0%,
+            transparent 70%
+          );
+      }
+
+      .orb-sphere .orb-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        z-index: 6;
+        border: 1.5px solid transparent;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.55) 0%,
+            rgba(190, 160, 255, 0.2) 35%,
+            rgba(90, 70, 255, 0.08) 65%,
+            rgba(255, 190, 255, 0.3) 100%
+          )
+          border-box;
+        -webkit-mask:
+          linear-gradient(#fff 0 0) padding-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: destination-out;
+        mask-composite: exclude;
+      }
+
+      @keyframes morph {
+        0% {
+          border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+        }
+        14% {
+          border-radius: 58% 42% 44% 56% / 52% 48% 52% 48%;
+        }
+        28% {
+          border-radius: 42% 58% 60% 40% / 58% 34% 66% 42%;
+        }
+        42% {
+          border-radius: 56% 44% 38% 62% / 44% 60% 40% 56%;
+        }
+        57% {
+          border-radius: 48% 52% 54% 46% / 62% 38% 62% 38%;
+        }
+        71% {
+          border-radius: 62% 38% 46% 54% / 40% 56% 44% 60%;
+        }
+        85% {
+          border-radius: 44% 56% 58% 42% / 54% 46% 54% 46%;
+        }
+        100% {
+          border-radius: 52% 48% 42% 58% / 46% 54% 46% 54%;
+        }
+      }
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes breathe {
+        from {
+          transform: scale(0.97);
+        }
+        to {
+          transform: scale(1.03);
+        }
+      }
+
+      .orb-eye-canvas {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      /* FLOATING ORB BUTTON */
+      #orb-float-btn {
+        transition: transform 0.2s ease;
+      }
+      #orb-float-btn:hover {
+        transform: scale(1.1);
+      }
+      #orb-float-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* ORB MODAL */
+      #orb-modal {
+        z-index: 9998;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen text-slate-800 font-sans antialiased selection:bg-brand-100 selection:text-brand-600"
+  >
+    <!-- ── MODAL OVERLAYS ── -->
+    <!-- ADD this inside the gate div, at the very top -->
+
+    <div
+      id="custom-alert-overlay"
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300"
+        id="alert-box"
+      >
+        <div
+          class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl mb-4"
+        >
+          📢
+        </div>
+        <h3
+          class="text-base font-extrabold text-slate-900 mb-2"
+          id="alert-title"
+        >
+          Notice
+        </h3>
+        <p
+          class="text-xs text-slate-500 font-medium leading-relaxed mb-6"
+          id="alert-body"
+        >
+          Message
+        </p>
+        <button
+          onclick="closeCustomAlert()"
+          class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold transition-all active:scale-95 text-xs"
+        >
+          Acknowledge
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="custom-confirm-overlay"
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300"
+        id="confirm-box"
+      >
+        <div
+          class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-xl mb-4"
+        >
+          ❓
+        </div>
+        <h3
+          class="text-base font-extrabold text-slate-900 mb-2"
+          id="confirm-title"
+        >
+          Confirm
+        </h3>
+        <p
+          class="text-xs text-slate-500 font-medium leading-relaxed mb-6"
+          id="confirm-body"
+        >
+          Are you sure?
+        </p>
+        <div class="flex gap-3">
+          <button
+            onclick="resolveCustomConfirm(false)"
+            id="confirm-cancel-lbl"
+            class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all text-xs active:scale-95"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="resolveCustomConfirm(true)"
+            id="confirm-ok-lbl"
+            class="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-all text-xs active:scale-95"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="toast-container"
+      class="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] flex flex-col gap-2 pointer-events-none max-w-xs sm:max-w-md w-full px-4"
+    ></div>
+
+    <!-- ── LOGIN GATE ── -->
+    <div
+      id="gate"
+      class="fixed inset-0 bg-slate-950 z-[9999] flex flex-col items-center justify-center p-6"
+    >
+      <div class="absolute top-4 right-4 z-[99999]">
+        <button
+          onclick="toggleLang()"
+          id="gate-lang-btn"
+          class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-extrabold rounded-lg transition-colors"
+        >
+          🌐 日本語
+        </button>
+      </div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-600/25 via-slate-950 to-slate-950 pointer-events-none"
+      ></div>
+      <div class="relative z-10 w-full max-w-md text-center space-y-6">
+        <div class="inline-flex p-4">
+          <div class="orb-scene orb-md" id="gate-orb-scene">
+            <div class="orb-glow-ring"></div>
+            <div class="orb-sphere" id="gate-sphere">
+              <div class="orb-inner1"></div>
+              <div class="orb-inner2"></div>
+              <div class="orb-gloss"></div>
+              <div class="orb-ring"></div>
+            </div>
+            <canvas
+              class="orb-eye-canvas"
+              id="gate-eyes"
+              width="110"
+              height="110"
+            ></canvas>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-white text-3xl font-extrabold tracking-tight">
+            Collegiate Portal
+          </h1>
+          <p class="text-slate-400 text-sm mt-1">
+            Osaka Christian College &bull; 大阪キリスト教短期大学
+          </p>
+        </div>
+        <div
+          class="bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 border border-slate-800 shadow-2xl text-left space-y-4"
+        >
+          <div>
+            <label
+              class="text-slate-300 text-xs font-bold uppercase tracking-wider block mb-2 text-center"
+              id="gate-label"
+              >学生番号</label
+            >
+            <input
+              type="text"
+              inputmode="numeric"
+              id="sid-input"
+              pattern="[0-9]*"
+              placeholder="学生番号を入力してください"
+              class="w-full text-center py-4 rounded-2xl bg-slate-800 border border-slate-700 text-white font-black text-2xl tracking-widest outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder:text-slate-600"
+            />
+          </div>
+          <button
+            onclick="login()"
+            class="w-full py-4 bg-brand-500 hover:bg-brand-600 text-white font-extrabold rounded-2xl shadow-lg shadow-brand-500/20 transition-all active:scale-[0.98] text-sm"
+          >
+            Enter Portal
+          </button>
+          <div
+            id="gate-error"
+            class="text-rose-400 text-xs font-bold text-center h-4"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MAIN APP ── -->
+    <div
+      class="min-h-screen flex flex-col lg:flex-row max-w-[1440px] mx-auto bg-[#F8FAFC] relative"
+    >
+      <!-- ── SIDEBAR (desktop only) ── -->
+      <aside
+        class="hidden lg:flex lg:w-[280px] bg-white border-r border-slate-200/80 flex-col sticky top-0 h-screen z-50 p-6"
+      >
+        <div class="flex items-center gap-3 mb-8">
+          <div
+            class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-500/10"
+          >
+            <svg
+              class="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 14l9-5-9-5-9 5 9 5z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+              />
+            </svg>
+          </div>
+          <div>
+            <h2 class="font-extrabold text-slate-900 text-sm leading-tight">
+              Collegiate <span class="text-brand-500">Portal</span>
+            </h2>
+            <span
+              class="text-[9px] font-bold text-slate-400 tracking-wider block uppercase"
+              >Osaka Christian College</span
+            >
+          </div>
+        </div>
+
+        <div class="flex-1 space-y-6 overflow-y-auto custom-scroll">
+          <div>
+            <span
+              class="text-[10px] font-bold text-slate-400 tracking-wider uppercase block mb-3"
+              >Workspace</span
+            >
+            <nav class="space-y-1" id="sidebar-nav">
+              <button
+                onclick="switchTab('home')"
+                class="nav-btn active flex items-center justify-between w-full p-3 rounded-xl font-bold text-xs text-left transition-all group bg-brand-50 text-brand-600"
+              >
+                <span class="flex items-center gap-3"
+                  ><span class="text-base">🏠</span
+                  ><span
+                    class="lbl-txt"
+                    data-en="Dashboard Home"
+                    data-ja="ダッシュボード"
+                    >Dashboard Home</span
+                  ></span
+                >
+              </button>
+              <button
+                onclick="switchTab('classes')"
+                class="nav-btn flex items-center justify-between w-full p-3 rounded-xl font-bold text-xs text-left transition-all group text-slate-600 hover:bg-slate-50"
+              >
+                <span class="flex items-center gap-3"
+                  ><span class="text-base">📚</span
+                  ><span class="lbl-txt" data-en="My Classes" data-ja="講義一覧"
+                    >My Classes</span
+                  ></span
+                >
+                <span
+                  class="bg-brand-50 text-brand-600 text-[10px] font-black px-2 py-0.5 rounded-full"
+                  id="class-badge-count"
+                  >0</span
+                >
+              </button>
+              <button
+                onclick="switchTab('schedule')"
+                class="nav-btn flex items-center justify-between w-full p-3 rounded-xl font-bold text-xs text-left transition-all group text-slate-600 hover:bg-slate-50"
+              >
+                <span class="flex items-center gap-3"
+                  ><span class="text-base">📅</span
+                  ><span
+                    class="lbl-txt"
+                    data-en="Weekly Schedule"
+                    data-ja="時間割マップ"
+                    >Weekly Schedule</span
+                  ></span
+                >
+              </button>
+              <button
+                onclick="switchTab('reviews')"
+                class="nav-btn flex items-center justify-between w-full p-3 rounded-xl font-bold text-xs text-left transition-all group text-slate-600 hover:bg-slate-50"
+              >
+                <span class="flex items-center gap-3"
+                  ><span class="text-base">💬</span
+                  ><span
+                    class="lbl-txt"
+                    data-en="Anonymous Reviews"
+                    data-ja="匿名評価掲示板"
+                    >Anonymous Reviews</span
+                  ></span
+                >
+              </button>
+            </nav>
+          </div>
+
+          <!-- Quick Tasks (desktop sidebar) -->
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <span
+                class="text-[10px] font-bold text-slate-400 tracking-wider uppercase block"
+                id="tasks-title"
+                >Urgent Tasks</span
+              >
+              <span
+                class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-full"
+                id="task-completed-ratio"
+                >0/0</span
+              >
+            </div>
+            <div class="flex gap-1.5 mb-3">
+              <input
+                type="text"
+                id="task-input"
+                placeholder="New quick task..."
+                class="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50"
+              />
+              <button
+                onclick="addQuickTask()"
+                class="p-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-colors font-black text-xs flex items-center justify-center w-8 h-8"
+              >
+                ＋
+              </button>
+            </div>
+            <div
+              class="max-h-[140px] overflow-y-auto space-y-1.5 custom-scroll pr-1"
+              id="quick-tasks-list"
+            ></div>
+          </div>
+        </div>
+
+        <!-- User Footer -->
+        <div
+          class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto"
+        >
+          <div class="flex items-center gap-2">
+            <div
+              class="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center font-bold text-xs text-brand-600"
+              id="user-avatar"
+            >
+              #
+            </div>
+            <div>
+              <span
+                class="text-xs font-extrabold text-slate-800 block"
+                id="user-id-lbl"
+                >Student</span
+              >
+              <span
+                class="text-[9px] font-bold text-slate-400 block"
+                id="user-sub-lbl"
+                >Osaka Main Campus</span
+              >
+            </div>
+          </div>
+          <button
+            onclick="toggleLang()"
+            id="lang-btn-lbl"
+            class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-extrabold rounded-lg transition-colors uppercase"
+          >
+            🌐 日本語
+          </button>
+        </div>
+      </aside>
+
+      <!-- ── MAIN CONTENT ── -->
+      <main class="flex-1 flex flex-col min-w-0">
+        <!-- ── HEADER ── -->
+        <header
+          class="bg-white border-b border-slate-200/80 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-3 z-40 sticky top-0"
+        >
+          <!-- Left: title + breadcrumb -->
+          <div class="min-w-0">
+            <h2
+              class="text-sm md:text-lg font-black text-slate-950 truncate"
+              id="welcome-msg"
+            >
+              Portal System
+            </h2>
+            <p
+              class="text-[10px] md:text-xs text-slate-400 font-semibold mt-0.5 flex items-center gap-1 truncate"
+              id="breadcrumb-sub"
+            >
+              <span>Collegiate Workspace</span> &bull;
+              <span id="active-tab-lbl">Dashboard Home</span>
+            </p>
+          </div>
+
+          <!-- Right: clock + weather + lang (mobile shows lang button here) -->
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <!-- Clock -->
+            <div
+              class="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200/60 rounded-xl px-3 py-1.5"
+            >
+              <span class="text-sm">🕒</span>
+              <div class="text-left leading-none">
+                <span
+                  class="text-[11px] font-black text-slate-800 block font-mono"
+                  id="header-time"
+                  >00:00:00</span
+                >
+                <span
+                  class="text-[8px] font-bold text-slate-400 tracking-widest uppercase block mt-0.5"
+                  id="header-date"
+                  >--</span
+                >
+              </div>
+            </div>
+            <!-- Weather -->
+            <div
+              class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/60 rounded-xl px-2.5 py-1.5"
+            >
+              <span class="text-sm" id="header-weather-icon">☀️</span>
+              <div class="text-left leading-none">
+                <span
+                  class="text-[11px] font-black text-slate-800 block"
+                  id="header-weather-temp"
+                  >--°C</span
+                >
+                <span
+                  class="text-[8px] font-bold text-slate-400 block mt-0.5 hidden sm:block"
+                  id="header-weather-desc"
+                  >Loading...</span
+                >
+              </div>
+            </div>
+            <!-- Lang toggle — visible on mobile in header, hidden on desktop (it's in sidebar) -->
+            <button
+              onclick="toggleLang()"
+              id="lang-btn-lbl-mobile"
+              class="lg:hidden px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-extrabold rounded-lg transition-colors uppercase"
+            >
+              🌐 日本語
+            </button>
+          </div>
+        </header>
+
+        <!-- ── CONTENT PANELS ── -->
+        <div class="flex-1 p-4 md:p-6 overflow-y-auto max-w-full pb-24 lg:pb-6">
+          <!-- 1. HOME DASHBOARD -->
+          <section id="ws-home" class="ws-view space-y-4 md:space-y-6 block">
+            <!-- Banner -->
+            <div
+              class="bg-gradient-to-br from-[#1E3A8A] via-[#2E48A0] to-slate-900 rounded-2xl md:rounded-3xl p-5 md:p-8 text-white relative overflow-hidden shadow-xl shadow-brand-500/5"
+            >
+              <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6"
+              >
+                <div class="relative z-10 space-y-2 md:space-y-3 max-w-xl">
+                  <span
+                    class="bg-white/10 backdrop-blur-md text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full border border-white/10 inline-block"
+                    >COLLEGE COMPANION v3.2</span
+                  >
+                  <h1
+                    class="text-xl md:text-3xl font-black tracking-tight"
+                    id="dashboard-banner-title"
+                  >
+                    Welcome Back!
+                  </h1>
+                  <p
+                    class="text-xs md:text-sm text-brand-100/90 font-medium leading-relaxed hidden sm:block"
+                  >
+                    Here is your academic command center. Monitor your immediate
+                    schedule, check your daily bag checklist, or explore active
+                    collegiate events.
+                  </p>
+                  <div
+                    class="pt-1 md:pt-2 flex flex-wrap items-center gap-3 md:gap-4"
+                  >
+                    <button
+                      onclick="switchTab('classes')"
+                      class="px-4 py-2 md:py-2.5 bg-white text-brand-600 hover:bg-brand-50 font-black text-xs rounded-xl transition-all shadow-md active:scale-95"
+                    >
+                      View Class Grid
+                    </button>
+                    <span
+                      class="text-xs font-bold text-brand-100/80 flex items-center gap-2"
+                    >
+                      <span
+                        class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-ping flex-shrink-0"
+                      ></span>
+                      <span
+                        id="next-class-countdown"
+                        class="text-[10px] md:text-xs"
+                        >Scanning next class blocks...</span
+                      >
+                    </span>
+                  </div>
+                </div>
+                <!-- Mascot -->
+                <div
+                  class="relative z-10 flex-shrink-0 flex items-center gap-3 bg-white/5 backdrop-blur-xl border border-white/10 p-3 md:p-4 rounded-2xl"
+                >
+                  <div
+                    class="orb-scene orb-sm flex-shrink-0"
+                    id="banner-orb-scene"
+                  >
+                    <div class="orb-glow-ring"></div>
+                    <div class="orb-sphere" id="banner-sphere">
+                      <div class="orb-inner1"></div>
+                      <div class="orb-inner2"></div>
+                      <div class="orb-gloss"></div>
+                      <div class="orb-ring"></div>
+                    </div>
+                    <canvas
+                      class="orb-eye-canvas"
+                      id="banner-eyes"
+                      width="80"
+                      height="80"
+                    ></canvas>
+                  </div>
+                  <div>
+                    <span
+                      class="text-[8px] font-black tracking-widest text-brand-200 block uppercase"
+                      >Assistant Kiritan</span
+                    >
+                    <p
+                      class="text-[11px] font-bold text-white mt-0.5 max-w-[160px] md:max-w-xs"
+                      id="mascot-speech-lbl"
+                    >
+                      Check out your classes today!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── MOBILE TASKS CARD (only on mobile) ── -->
+            <div
+              class="lg:hidden bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm"
+            >
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-black text-slate-700"
+                  >⚡ <span id="tasks-title-mobile">Urgent Tasks</span></span
+                >
+                <span
+                  class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-full"
+                  id="task-completed-ratio"
+                  >0/0</span
+                >
+              </div>
+              <div class="flex gap-1.5 mb-3">
+                <input
+                  type="text"
+                  id="task-input"
+                  placeholder="New quick task..."
+                  class="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50"
+                />
+                <button
+                  onclick="addQuickTask()"
+                  class="p-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-black text-xs w-8 h-8 flex items-center justify-center flex-shrink-0"
+                >
+                  ＋
+                </button>
+              </div>
+              <div
+                class="max-h-[150px] overflow-y-auto space-y-1.5 custom-scroll"
+                id="quick-tasks-list"
+              ></div>
+            </div>
+
+            <!-- Main grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+              <!-- Left main column -->
+              <div class="lg:col-span-8 space-y-4 md:space-y-6">
+                <!-- Today's Classes -->
+                <div
+                  class="bg-white rounded-2xl md:rounded-3xl border border-slate-200/80 p-4 md:p-6 shadow-sm"
+                >
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                      <span class="text-base">📅</span>
+                      <div>
+                        <h3
+                          class="font-extrabold text-slate-900 text-sm tracking-tight"
+                          id="today-classes-title"
+                        >
+                          Today's Class Schedule
+                        </h3>
+                        <p
+                          class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
+                          id="today-classes-subtitle"
+                        >
+                          CORE DAILY PERIODS
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onclick="switchTab('schedule')"
+                      class="text-xs font-black text-brand-500 hover:text-brand-600 transition-colors whitespace-nowrap"
+                      id="view-grid-lbl"
+                    >
+                      Full Week ➔
+                    </button>
+                  </div>
+                  <div id="today-classes-container" class="space-y-3"></div>
+                  <div
+                    class="text-[10px] text-slate-400 font-bold mt-4 flex items-center gap-1.5"
+                  >
+                    <span>💡</span>
+                    <span id="click-tip-lbl"
+                      >Click any class block to view details.</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Don't Forget Reminder -->
+                <div
+                  class="bg-white rounded-2xl md:rounded-3xl border border-slate-200/80 p-4 md:p-6 shadow-sm"
+                >
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                      <span class="text-base">🎒</span>
+                      <div>
+                        <h3
+                          class="font-extrabold text-slate-900 text-sm tracking-tight"
+                          id="reminder-card-title"
+                        >
+                          Don't Forget Today!
+                        </h3>
+                        <p
+                          class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
+                          id="reminder-card-subtitle"
+                        >
+                          ITEMS TO BRING FOR TODAY'S CLASSES
+                        </p>
+                      </div>
+                    </div>
+                    <!-- Weather mini card -->
+                    <div
+                      id="weather-details-card"
+                      class="bg-slate-50 rounded-xl px-3 py-2 border border-slate-100 text-right min-w-[80px]"
+                    >
+                      <span class="text-[10px] font-bold text-slate-400"
+                        >Loading...</span
+                      >
+                    </div>
+                  </div>
+                  <div id="bring-reminder-container"></div>
+                </div>
+              </div>
+
+              <!-- Right sidebar column -->
+              <div class="lg:col-span-4 space-y-4 md:space-y-6">
+                <!-- Campus Events -->
+                <div
+                  class="bg-white rounded-2xl md:rounded-3xl border border-slate-200/80 p-4 md:p-6 shadow-sm"
+                >
+                  <div class="flex items-center gap-2 mb-4">
+                    <span class="text-base">📢</span>
+                    <div>
+                      <h3
+                        class="font-extrabold text-slate-900 text-sm tracking-tight"
+                        id="events-card-title"
+                      >
+                        Live Campus Events
+                      </h3>
+                      <p
+                        class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
+                      >
+                        CURRENT NOTICES & HUBS
+                      </p>
+                    </div>
+                  </div>
+                  <div id="events-feed" class="space-y-4"></div>
+                </div>
+
+                <!-- Upcoming Exams -->
+                <div
+                  class="bg-white rounded-2xl md:rounded-3xl border border-slate-200/80 p-4 md:p-6 shadow-sm"
+                >
+                  <div class="flex items-center gap-2 mb-4">
+                    <span class="text-base">📝</span>
+                    <div>
+                      <h3
+                        class="font-extrabold text-slate-900 text-sm tracking-tight"
+                        id="exams-card-title"
+                      >
+                        Upcoming Exams
+                      </h3>
+                      <p
+                        class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
+                      >
+                        PREPARATION COUNTER
+                      </p>
+                    </div>
+                  </div>
+                  <div id="exams-feed" class="space-y-3"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. CLASSES GRID -->
+          <section
+            id="ws-classes"
+            class="ws-view space-y-4 md:space-y-6 hidden"
+          >
+            <div id="classes-index" class="space-y-4">
+              <div>
+                <h1
+                  class="text-xl font-black text-slate-950"
+                  id="all-classes-header"
+                >
+                  All Enrolled Classes
+                </h1>
+                <p
+                  class="text-xs text-slate-400 font-semibold mt-1"
+                  id="all-classes-sub"
+                >
+                  Click on a card below to enter class detail modes.
+                </p>
+              </div>
+              <div
+                id="block-grid"
+                class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
+              ></div>
+            </div>
+            <div id="class-detail" class="hidden"></div>
+          </section>
+
+          <!-- 3. WEEKLY SCHEDULE -->
+          <section
+            id="ws-schedule"
+            class="ws-view space-y-4 md:space-y-6 hidden"
+          >
+            <div>
+              <h1
+                class="text-xl font-black text-slate-950"
+                id="weekly-schedule-header"
+              >
+                Weekly Timetable Layout
+              </h1>
+              <p
+                class="text-xs text-slate-400 font-semibold mt-1"
+                id="weekly-schedule-sub"
+              >
+                Your structured curriculum planner for the active collegiate
+                semester.
+              </p>
+            </div>
+            <div
+              id="full-schedule"
+              class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6"
+            ></div>
+          </section>
+
+          <!-- 4. ANONYMOUS REVIEWS -->
+          <section
+            id="ws-reviews"
+            class="ws-view space-y-4 md:space-y-6 hidden"
+          >
+            <div
+              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            >
+              <div>
+                <h1
+                  class="text-xl font-black text-slate-950"
+                  id="reviews-header"
+                >
+                  Anonymous Course Reviews
+                </h1>
+                <p
+                  class="text-xs text-slate-400 font-semibold mt-1"
+                  id="reviews-sub"
+                >
+                  Submit honest course feedback anonymously.
+                </p>
+              </div>
+              <span
+                class="bg-brand-50 text-brand-600 text-xs font-black px-3 py-1.5 rounded-xl border border-brand-100 flex items-center gap-1.5 self-start"
+              >
+                🔒 <span id="anon-lock-shield">Strict Privacy Lock Active</span>
+              </span>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+              <div
+                class="lg:col-span-5 bg-white rounded-2xl md:rounded-3xl border border-slate-200/80 p-4 md:p-6 shadow-sm space-y-4 self-start"
+              >
+                <h3
+                  class="font-extrabold text-slate-950 text-sm"
+                  id="feedback-form-title"
+                >
+                  Write Class Feedback
+                </h3>
+                <div>
+                  <label
+                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
+                    >Selected Subject</label
+                  >
+                  <select
+                    id="rv-class"
+                    class="w-full p-3 rounded-xl border border-slate-200 outline-none text-xs font-bold text-slate-700 bg-slate-50 focus:border-brand-500"
+                  ></select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
+                      >Rating</label
+                    >
+                    <select
+                      id="rv-stars"
+                      class="w-full p-3 rounded-xl border border-slate-200 outline-none text-xs font-bold text-slate-700 bg-slate-50 focus:border-brand-500"
+                    >
+                      <option value="5">⭐⭐⭐⭐⭐ 最高</option>
+                      <option value="4">⭐⭐⭐⭐ 良い</option>
+                      <option value="3">⭐⭐⭐ 普通</option>
+                      <option value="2">⭐⭐ 難しい</option>
+                      <option value="1">⭐ きつい</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
+                      >Difficulty</label
+                    >
+                    <select
+                      id="rv-diff"
+                      class="w-full p-3 rounded-xl border border-slate-200 outline-none text-xs font-bold text-slate-700 bg-slate-50 focus:border-brand-500"
+                    >
+                      <option value="easy">簡単</option>
+                      <option value="ok">普通</option>
+                      <option value="hard">難しい</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
+                    >Your Thoughts</label
+                  >
+                  <textarea
+                    id="rv-body"
+                    placeholder="授業の感想を書いてください..."
+                    class="w-full p-3 rounded-xl border border-slate-200 outline-none text-xs font-bold text-slate-700 bg-slate-50 focus:border-brand-500 min-h-[120px] resize-y"
+                  ></textarea>
+                </div>
+                <button
+                  onclick="postReview()"
+                  class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all active:scale-[0.98]"
+                >
+                  ✨ Submit Anonymously
+                </button>
+              </div>
+              <div class="lg:col-span-7">
+                <div id="reviews-list" class="space-y-4"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- ── MOBILE BOTTOM NAV ── -->
+    <nav
+      class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 flex items-center justify-around z-50 safe-area-inset-bottom"
+      style="padding: 8px 0 max(8px, env(safe-area-inset-bottom))"
+    >
+      <button
+        onclick="switchTab('home')"
+        class="mobile-nav-btn active flex flex-col items-center gap-1 text-brand-500 active:scale-95 transition-all px-4 py-1"
+      >
+        <span class="text-xl">🏠</span>
+        <span class="text-[9px] font-extrabold">Home</span>
+      </button>
+      <button
+        onclick="switchTab('classes')"
+        class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 active:scale-95 transition-all px-4 py-1"
+      >
+        <span class="text-xl">📚</span>
+        <span class="text-[9px] font-extrabold">Classes</span>
+      </button>
+      <button
+        onclick="switchTab('schedule')"
+        class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 active:scale-95 transition-all px-4 py-1"
+      >
+        <span class="text-xl">📅</span>
+        <span class="text-[9px] font-extrabold">Schedule</span>
+      </button>
+      <button
+        onclick="switchTab('reviews')"
+        class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 active:scale-95 transition-all px-4 py-1"
+      >
+        <span class="text-xl">💬</span>
+        <span class="text-[9px] font-extrabold">Reviews</span>
+      </button>
+    </nav>
+
+    <!-- ── FLOATING ORB BUTTON ── -->
+    <button
+      id="orb-float-btn"
+      onclick="openOrbModal()"
+      class="fixed bottom-24 right-4 lg:bottom-6 z-[9000] cursor-pointer bg-transparent border-0 p-0"
+    >
+      <div class="orb-scene orb-xs" id="float-orb-scene">
+        <div class="orb-glow-ring"></div>
+        <div class="orb-sphere" id="float-sphere">
+          <div class="orb-inner1"></div>
+          <div class="orb-inner2"></div>
+          <div class="orb-gloss"></div>
+          <div class="orb-ring"></div>
+        </div>
+        <canvas
+          class="orb-eye-canvas"
+          id="float-eyes"
+          width="56"
+          height="56"
+        ></canvas>
+      </div>
+    </button>
+
+    <!-- ── ORB MODAL ── -->
+    <div
+      id="orb-modal"
+      class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[9998] flex flex-col items-center justify-center p-6 opacity-0 pointer-events-none transition-all duration-300"
+    >
+      <div class="relative flex flex-col items-center gap-6">
+        <!-- Close button -->
+        <button
+          onclick="closeOrbModal()"
+          class="absolute -top-2 -right-2 w-8 h-8 bg-slate-800 text-slate-300 rounded-full text-xs font-black hover:bg-slate-700 z-10"
+        >
+          ✕
+        </button>
+        <!-- Full orb -->
+        <div class="orb-scene" id="modal-orb-scene">
+          <div class="orb-glow-ring"></div>
+          <div class="orb-sphere" id="modal-sphere">
+            <div class="orb-inner1"></div>
+            <div class="orb-inner2"></div>
+            <div class="orb-gloss"></div>
+            <div class="orb-ring"></div>
+          </div>
+          <canvas
+            class="orb-eye-canvas"
+            id="modal-eyes"
+            width="280"
+            height="280"
+          ></canvas>
+        </div>
+        <!-- Speech card -->
+        <div
+          class="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-2xl px-6 py-4 text-center max-w-xs"
+        >
+          <span
+            class="text-[9px] font-black tracking-widest text-brand-200 block uppercase mb-1"
+            >Assistant Kiritan</span
+          >
+          <p class="text-sm font-bold text-white" id="modal-mascot-speech">
+            ...
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCRIPTS (load order matters) ── -->
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/lang.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/reminder.js"></script>
+    <script src="js/schedule.js"></script>
+    <script src="js/classes.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/orb.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

@@ -13,9 +13,11 @@ from routes import (
     checklist,
     classes,
     events,
+    live,
     login,
     reviews,
     schedule,
+    snippets,
     tasks,
 )
 
@@ -51,9 +53,11 @@ def health():
 
 
 # Mount routers
-app.include_router(login.router)        # POST /login                  (public)
+app.include_router(login.router)        # POST /login, /my/password    (public / private)
 app.include_router(reviews.router)      # /share/reviews               (public)
 app.include_router(events.router)       # /share/events                (public read)
+app.include_router(snippets.router)     # /share/snippets              (login required)
+app.include_router(live.router)         # /share/live/{class}          (login required)
 app.include_router(tasks.router)        # /my/tasks                    (private)
 app.include_router(schedule.router)     # /my/schedule                 (private)
 app.include_router(classes.router)      # /my/classes                  (private)

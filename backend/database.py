@@ -75,6 +75,31 @@ def init_db():
             checked INTEGER NOT NULL DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users(id)
         );
+
+        CREATE TABLE IF NOT EXISTS snippets (
+            id     INTEGER PRIMARY KEY AUTOINCREMENT,
+            class  TEXT NOT NULL,
+            title  TEXT NOT NULL,
+            code   TEXT NOT NULL,
+            author TEXT NOT NULL,
+            ts     INTEGER NOT NULL
+        );
+
+        -- A row here = that class has a live session running right now.
+        -- Stopping the session deletes the row and its posts.
+        CREATE TABLE IF NOT EXISTS live_sessions (
+            class      TEXT PRIMARY KEY,
+            started_by TEXT NOT NULL,
+            ts         INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS live_posts (
+            id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            class TEXT NOT NULL,
+            sid   TEXT NOT NULL,
+            code  TEXT NOT NULL,
+            ts    INTEGER NOT NULL
+        );
         """
     )
 

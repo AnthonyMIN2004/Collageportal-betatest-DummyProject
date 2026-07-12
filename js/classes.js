@@ -1,10 +1,24 @@
 // ── COLLEGIATE PORTAL | CLASSES.JS ──
-// Classes grid, detail view, code snippets, live session
+// Classes grid, detail view, code snippets, live session.
+// Snippets + live sessions go through the backend when online (shared
+// between devices); offline they fall back to this device's storage.
 
 let currentClass = null;
 let currentTab = 'info';
 let snippets = {};
 let reviews = [];
+
+// Live session state for the currently open class (online mode).
+// The Live tab polls the server every few seconds while it's open.
+let liveState = { active: false, posts: [] };
+let livePoll = null;
+
+function stopLivePoll() {
+  if (livePoll) {
+    clearInterval(livePoll);
+    livePoll = null;
+  }
+}
 
 function loadLocalDatabase() {
   const sn = localStorage.getItem('kiritan_snippets');
@@ -60,6 +74,7 @@ function renderBlockGrid() {
 function showClassDetail(name) {
   currentClass = name;
   currentTab = 'info';
+  liveState = { active: false, posts: [] }; // don't show another class's stream
   document.getElementById('classes-index').classList.add('hidden');
   const container = document.getElementById('class-detail');
   container.classList.remove('hidden');
@@ -99,6 +114,7 @@ function showClassDetail(name) {
 }
 
 function hideClassDetail() {
+  stopLivePoll();
   document.getElementById('classes-index').classList.remove('hidden');
   document.getElementById('class-detail').classList.add('hidden');
 }
@@ -113,11 +129,15 @@ function switchClassTab(tabName) {
     activeBtn.className = 'ctab active px-4 py-2 text-xs font-extrabold rounded-xl transition-all bg-brand-500 text-white shadow-sm';
   }
   renderClassTabContent();
+  // Online: render the cached copy above, then fetch a fresh one
+  if (tabName === 'snippets') loadSnippets();
+  if (tabName === 'live') loadLive();
 }
 
 function renderClassTabContent() {
   const output = document.getElementById('class-tab-interior-content');
   if (!output) return;
+  stopLivePoll(); // restarted below if the Live tab is showing
   const info = CLASS_INFO[currentClass] || {};
 
   if (currentTab === 'info') {
@@ -146,11 +166,14 @@ function renderClassTabContent() {
 
   if (currentTab === 'snippets') {
     const mySnippets = snippets[currentClass] || [];
-    output.innerHTML = `
+    // Offline only: warn that snippets won't reach other devices
+    const offlineBanner = API.online ? '' : `
       <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs font-semibold text-amber-800 mb-4 flex items-center gap-2">
         <span>⚠️</span>
-        <span>${lang === 'en' ? 'Code snippets are saved on this device only for now.' : 'コードスニペットは今のところこの端末にのみ保存されます。'}</span>
-      </div>
+        <span>${lang === 'en' ? 'Offline mode — snippets are saved on this device only.' : 'オフラインモード：スニペットはこの端末にのみ保存されます。'}</span>
+      </div>`;
+    output.innerHTML = `
+      ${offlineBanner}
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-5 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-4 self-start">
           <h4 class="font-extrabold text-slate-900 text-sm">Post Code Material</h4>
@@ -166,19 +189,24 @@ function renderClassTabContent() {
         </div>
         <div class="lg:col-span-7 space-y-4">
           <div id="snippets-feed" class="space-y-3">
-            ${mySnippets.length ? mySnippets.map((s, i) => `
+            ${mySnippets.length ? mySnippets.map((s, i) => {
+              // You can delete your own posts; admin can delete anything.
+              // Offline snippets live on this device, so they're always yours.
+              const canDelete = !API.online || s.author === studentId || isAdmin;
+              const byline = API.online && s.author ? ` &bull; ${escHtml(String(s.author))}` : '';
+              return `
               <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-sm space-y-3">
                 <div class="flex items-center justify-between">
                   <h4 class="text-xs font-black text-slate-800">${escHtml(s.title)}</h4>
-                  <span class="text-[10px] text-slate-400 font-bold">${timeAgo(s.ts)}</span>
+                  <span class="text-[10px] text-slate-400 font-bold">${timeAgo(s.ts)}${byline}</span>
                 </div>
                 <pre class="bg-[#1E1E2E] text-[#CDD6F4] font-mono text-xs p-3.5 rounded-xl overflow-x-auto max-h-[180px] border border-[#313244]">${escHtml(s.code)}</pre>
                 <div class="flex justify-end gap-2">
                   <button onclick="copySnippet(${i})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-[10px] font-black text-slate-700 transition-all">Copy</button>
-                  <button onclick="deleteSnippet(${i})" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black transition-all">Delete</button>
+                  ${canDelete ? `<button onclick="deleteSnippet(${i})" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black transition-all">Delete</button>` : ''}
                 </div>
               </div>
-            `).join('') : `<p class="text-xs font-bold text-slate-400 text-center py-10 bg-white border border-slate-200 rounded-3xl">Be the first to post a study sandbox block! 💻</p>`}
+            `;}).join('') : `<p class="text-xs font-bold text-slate-400 text-center py-10 bg-white border border-slate-200 rounded-3xl">Be the first to post a study sandbox block! 💻</p>`}
           </div>
         </div>
       </div>
@@ -187,32 +215,28 @@ function renderClassTabContent() {
   }
 
   if (currentTab === 'live') {
-    const session = JSON.parse(sessionStorage.getItem('kiritan_live_' + currentClass) || 'null');
+    // Online: server state shared by every device (kept fresh by polling).
+    // Offline: sessionStorage demo, this device only.
+    const session = API.online
+      ? liveState
+      : JSON.parse(sessionStorage.getItem('kiritan_live_' + currentClass) || 'null');
     if (session?.active) {
-      const posts = session.posts || [];
+      // Stopping a session is for whoever started it (or admin) — the
+      // server enforces this too; hiding the button just avoids a 403.
+      const canStop = !API.online || session.started_by === studentId || isAdmin;
       output.innerHTML = `
         <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-xs font-semibold text-emerald-800 mb-4 flex items-center justify-between gap-4">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>${lang === 'en' ? 'Live session is running.' : 'ライブセッション実行中です。'}</span>
           </div>
-          <button onclick="endLiveSession()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black transition-all">Force Stop</button>
+          ${canStop ? `<button onclick="endLiveSession()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black transition-all">${lang === 'en' ? 'End Session' : 'セッション終了'}</button>` : ''}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div class="lg:col-span-8 space-y-4">
             <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm">
               <h4 class="font-extrabold text-slate-900 text-sm mb-3">${lang === 'en' ? 'Shared Code Feed' : '共有コードフィード'}</h4>
-              <div class="space-y-3" id="live-feed-streams">
-                ${posts.length ? posts.map(p => `
-                  <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-                    <div class="flex justify-between items-center mb-1.5">
-                      <span class="text-[10px] text-brand-600 font-extrabold">Student #${p.sid}</span>
-                      <span class="text-[9px] text-slate-400 font-bold">${timeAgo(p.ts)}</span>
-                    </div>
-                    <pre class="bg-[#1E1E2E] text-[#CDD6F4] font-mono text-xs p-3.5 rounded-xl border border-[#313244] overflow-x-auto">${escHtml(p.code)}</pre>
-                  </div>
-                `).join('') : `<p class="text-xs font-bold text-slate-400 text-center py-6">Waiting for stream uploads...</p>`}
-              </div>
+              <div class="space-y-3" id="live-feed-streams">${renderLivePosts(session.posts || [])}</div>
             </div>
           </div>
           <div class="lg:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 self-start">
@@ -223,32 +247,102 @@ function renderClassTabContent() {
         </div>
       `;
     } else {
+      const startLabel = API.online
+        ? (lang === 'en' ? 'Start Live Session' : 'ライブセッション開始')
+        : (lang === 'en' ? 'Start Demo Session' : 'デモセッション開始');
       output.innerHTML = `
         <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm text-center max-w-md mx-auto my-6 space-y-4">
           <span class="text-4xl block">⚡</span>
           <div>
             <h4 class="font-extrabold text-slate-900 text-sm">${lang === 'en' ? 'No live session right now' : 'ライブセッションはありません'}</h4>
-            <p class="text-xs text-slate-400 font-bold mt-1">${lang === 'en' ? 'Start a demo session to try the shared code stream.' : 'デモセッションを始めて、コード共有を試してみましょう。'}</p>
+            <p class="text-xs text-slate-400 font-bold mt-1">${lang === 'en' ? 'Start a session and everyone in this class can share code in real time.' : 'セッションを始めると、このクラスのみんなとリアルタイムでコードを共有できます。'}</p>
           </div>
-          <button onclick="startLiveSession()" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-black rounded-xl transition-all shadow-md">${lang === 'en' ? 'Start Demo Session' : 'デモセッション開始'}</button>
+          <button onclick="startLiveSession()" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-black rounded-xl transition-all shadow-md">${startLabel}</button>
         </div>
       `;
+    }
+    // Keep the feed fresh while the tab is open — light polling, no websockets
+    if (API.online) {
+      livePoll = setInterval(() => loadLive(false), 5000);
     }
   }
 }
 
-function postSnippet() {
+function renderLivePosts(posts) {
+  if (!posts.length) {
+    return `<p class="text-xs font-bold text-slate-400 text-center py-6">Waiting for stream uploads...</p>`;
+  }
+  return posts.map(p => `
+    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+      <div class="flex justify-between items-center mb-1.5">
+        <span class="text-[10px] text-brand-600 font-extrabold">${escHtml(String(p.sid))}</span>
+        <span class="text-[9px] text-slate-400 font-bold">${timeAgo(p.ts)}</span>
+      </div>
+      <pre class="bg-[#1E1E2E] text-[#CDD6F4] font-mono text-xs p-3.5 rounded-xl border border-[#313244] overflow-x-auto">${escHtml(p.code)}</pre>
+    </div>
+  `).join('');
+}
+
+// Pull this class's snippets from the server, then re-render if the
+// user is still looking at the snippets tab.
+async function loadSnippets() {
+  if (!API.online || !currentClass) return;
+  try {
+    const rows = await apiFetch('/share/snippets?class=' + encodeURIComponent(currentClass));
+    snippets[currentClass] = rows.map(r => ({
+      id: r.id, title: r.title, code: r.code, author: r.author, ts: r.ts,
+    }));
+    if (currentTab === 'snippets') renderClassTabContent();
+  } catch (e) {
+    console.warn('Snippets API failed, showing local copies:', e);
+  }
+}
+
+// Fetch live session state. rerender=false is the polling path: it only
+// swaps the feed contents so we don't wipe a half-typed textarea.
+async function loadLive(rerender = true) {
+  if (!API.online || !currentClass) return;
+  try {
+    const st = await apiFetch('/share/live/' + encodeURIComponent(currentClass));
+    const flipped = st.active !== liveState.active;
+    liveState = st;
+    if (currentTab !== 'live') return;
+    if (rerender || flipped) {
+      renderClassTabContent();
+    } else {
+      const feed = document.getElementById('live-feed-streams');
+      if (feed) feed.innerHTML = renderLivePosts(st.posts || []);
+    }
+  } catch (e) {
+    console.warn('Live session poll failed:', e);
+  }
+}
+
+async function postSnippet() {
   const title = document.getElementById('sn-title').value.trim();
   const code = document.getElementById('sn-code').value.trim();
   if (!title || !code) {
     showCustomAlert('Error', 'Please enter both a title and code.');
     return;
   }
-  if (!snippets[currentClass]) snippets[currentClass] = [];
-  snippets[currentClass].unshift({ title, class_name: currentClass, code, ts: Date.now() });
-  saveLocalDatabase();
-  renderClassTabContent();
-  showToast(lang === 'en' ? 'Uploaded to local workspace!' : 'コードを保存しました！');
+  if (API.online) {
+    try {
+      await apiFetch('/share/snippets', {
+        method: 'POST',
+        body: JSON.stringify({ class: currentClass, title, code }),
+      });
+      await loadSnippets();
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return;
+    }
+  } else {
+    if (!snippets[currentClass]) snippets[currentClass] = [];
+    snippets[currentClass].unshift({ title, class_name: currentClass, code, ts: Date.now() });
+    saveLocalDatabase();
+    renderClassTabContent();
+  }
+  showToast(lang === 'en' ? 'Snippet shared with the class!' : 'コードをクラスに共有しました！');
 }
 
 function copySnippet(i) {
@@ -262,35 +356,80 @@ function copySnippet(i) {
 }
 
 async function deleteSnippet(i) {
+  const item = (snippets[currentClass] || [])[i];
+  if (!item) return;
   const allow = await showCustomConfirm('Delete Script', 'Are you sure you want to delete this shared script block?', 'Delete', 'Cancel');
   if (!allow) return;
-  snippets[currentClass].splice(i, 1);
-  saveLocalDatabase();
-  renderClassTabContent();
+  if (API.online && item.id != null) {
+    try {
+      await apiFetch('/share/snippets/' + item.id, { method: 'DELETE' });
+      await loadSnippets();
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return;
+    }
+  } else {
+    snippets[currentClass].splice(i, 1);
+    saveLocalDatabase();
+    renderClassTabContent();
+  }
   showToast('Deleted item successfully.');
 }
 
-function startLiveSession() {
-  sessionStorage.setItem('kiritan_live_' + currentClass, JSON.stringify({ active: true, posts: [] }));
-  renderClassTabContent();
-  showToast('Live stream initialized.');
+async function startLiveSession() {
+  if (API.online) {
+    try {
+      await apiFetch('/share/live/' + encodeURIComponent(currentClass) + '/start', { method: 'POST' });
+      await loadLive();
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return;
+    }
+  } else {
+    sessionStorage.setItem('kiritan_live_' + currentClass, JSON.stringify({ active: true, posts: [] }));
+    renderClassTabContent();
+  }
+  showToast(lang === 'en' ? 'Live session started!' : 'ライブセッションを開始しました！');
 }
 
 async function endLiveSession() {
-  const allow = await showCustomConfirm('End Stream Session', 'Stop simulated classroom stream session?', 'End Session', 'Dismiss');
+  const allow = await showCustomConfirm('End Live Session', 'Stop the shared code session for everyone?', 'End Session', 'Dismiss');
   if (!allow) return;
-  sessionStorage.removeItem('kiritan_live_' + currentClass);
-  renderClassTabContent();
-  showToast('Stream closed.');
+  if (API.online) {
+    try {
+      await apiFetch('/share/live/' + encodeURIComponent(currentClass) + '/stop', { method: 'POST' });
+      await loadLive();
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return;
+    }
+  } else {
+    sessionStorage.removeItem('kiritan_live_' + currentClass);
+    renderClassTabContent();
+  }
+  showToast(lang === 'en' ? 'Session closed.' : 'セッションを終了しました。');
 }
 
-function postLocalLive() {
+async function postLocalLive() {
   const code = document.getElementById('live-input').value.trim();
   if (!code) return;
-  const session = JSON.parse(sessionStorage.getItem('kiritan_live_' + currentClass) || 'null');
-  if (!session) return;
-  session.posts.push({ sid: studentId, code, ts: Date.now() });
-  sessionStorage.setItem('kiritan_live_' + currentClass, JSON.stringify(session));
-  renderClassTabContent();
-  showToast('Stream updated!');
+  if (API.online) {
+    try {
+      await apiFetch('/share/live/' + encodeURIComponent(currentClass) + '/post', {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      });
+      await loadLive();
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return;
+    }
+  } else {
+    const session = JSON.parse(sessionStorage.getItem('kiritan_live_' + currentClass) || 'null');
+    if (!session) return;
+    session.posts.push({ sid: studentId, code, ts: Date.now() });
+    sessionStorage.setItem('kiritan_live_' + currentClass, JSON.stringify(session));
+    renderClassTabContent();
+  }
+  showToast(lang === 'en' ? 'Code pushed to the stream!' : 'コードを送信しました！');
 }

@@ -87,7 +87,7 @@ function showClassDetail(name) {
       <div>
         <span class="text-3xl block mb-2">${info.icon}</span>
         <h2 class="text-lg font-black">${name}</h2>
-        <p class="text-xs text-brand-100 font-semibold mt-1">📍 Room ${allC[0]?.room || 'TBD'} &bull; Osaka Academic Workspace</p>
+        <p class="text-xs text-brand-100 font-semibold mt-1">📍 Room ${allC[0]?.room || 'TBD'} &bull; Osaka Christian College</p>
       </div>
     </div>
     <div class="space-y-4">
@@ -149,7 +149,7 @@ function renderClassTabContent() {
     output.innerHTML = `
       <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs font-semibold text-amber-800 mb-4 flex items-center gap-2">
         <span>⚠️</span>
-        <span>Local sandbox emulated. Live server compilation connection requires Pi network deployment.</span>
+        <span>${lang === 'en' ? 'Code snippets are saved on this device only for now.' : 'コードスニペットは今のところこの端末にのみ保存されます。'}</span>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-5 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-4 self-start">
@@ -194,14 +194,14 @@ function renderClassTabContent() {
         <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-xs font-semibold text-emerald-800 mb-4 flex items-center justify-between gap-4">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Live Class Room Session is running dynamically.</span>
+            <span>${lang === 'en' ? 'Live session is running.' : 'ライブセッション実行中です。'}</span>
           </div>
           <button onclick="endLiveSession()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black transition-all">Force Stop</button>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div class="lg:col-span-8 space-y-4">
             <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm">
-              <h4 class="font-extrabold text-slate-900 text-sm mb-3">Feed Update Streams</h4>
+              <h4 class="font-extrabold text-slate-900 text-sm mb-3">${lang === 'en' ? 'Shared Code Feed' : '共有コードフィード'}</h4>
               <div class="space-y-3" id="live-feed-streams">
                 ${posts.length ? posts.map(p => `
                   <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -216,7 +216,7 @@ function renderClassTabContent() {
             </div>
           </div>
           <div class="lg:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 self-start">
-            <h4 class="font-extrabold text-slate-900 text-sm">Post to Shared Stream</h4>
+            <h4 class="font-extrabold text-slate-900 text-sm">${lang === 'en' ? 'Share Your Code' : 'コードをシェア'}</h4>
             <textarea id="live-input" placeholder="// Type code snippet..." class="w-full p-3 rounded-xl border border-slate-200 outline-none text-xs font-mono bg-[#1E1E2E] text-[#CDD6F4] min-h-[140px] focus:border-brand-500"></textarea>
             <button onclick="postLocalLive()" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-xs rounded-xl transition-all">⚡ Push Stream</button>
           </div>
@@ -227,10 +227,10 @@ function renderClassTabContent() {
         <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm text-center max-w-md mx-auto my-6 space-y-4">
           <span class="text-4xl block">⚡</span>
           <div>
-            <h4 class="font-extrabold text-slate-900 text-sm">No Active Real-Time Session</h4>
-            <p class="text-xs text-slate-400 font-bold mt-1">Simulate or start a lecture-wide synchronized stream session.</p>
+            <h4 class="font-extrabold text-slate-900 text-sm">${lang === 'en' ? 'No live session right now' : 'ライブセッションはありません'}</h4>
+            <p class="text-xs text-slate-400 font-bold mt-1">${lang === 'en' ? 'Start a demo session to try the shared code stream.' : 'デモセッションを始めて、コード共有を試してみましょう。'}</p>
           </div>
-          <button onclick="startLiveSession()" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-black rounded-xl transition-all shadow-md">Initialize Demo Session</button>
+          <button onclick="startLiveSession()" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-black rounded-xl transition-all shadow-md">${lang === 'en' ? 'Start Demo Session' : 'デモセッション開始'}</button>
         </div>
       `;
     }

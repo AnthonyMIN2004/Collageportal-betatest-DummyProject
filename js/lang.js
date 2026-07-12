@@ -16,60 +16,60 @@ function toggleLang() {
     gateLangBtn.textContent = lang === "en" ? "🌐 日本語" : "🌐 English";
   const strings = {
     en: {
-      "gate-label": "Enter Student ID to Begin",
-      "task-input-placeholder": "New quick task...",
-      "tasks-title": "Urgent Tasks",
-      "breadcrumb-workspace": "Collegiate Workspace",
-      "today-classes-title": "Today's Class Schedule",
-      "today-classes-subtitle": "CORE DAILY PERIODS",
-      "view-grid-lbl": "Full Week Grid ➔",
+      "gate-label": "Sign in with your Student ID",
+      "gate-hint": "Default password = your student ID",
+      "task-input-placeholder": "New task...",
+      "tasks-title": "Quick Tasks",
+      "breadcrumb-workspace": "Student Workspace",
+      "today-classes-title": "Today's Classes",
+      "today-classes-subtitle": "TODAY'S PERIODS",
+      "view-grid-lbl": "Full Week ➔",
       "click-tip-lbl":
-        "Click any class block to view syllabus, assignment targets, and professor logs.",
-      "events-card-title": "Live Campus Events",
+        "Tap a class to see its syllabus, exam info, and shared code.",
+      "events-card-title": "Campus Events",
 
       "exams-card-title": "Upcoming Exams",
-      "all-classes-header": "All Enrolled Classes",
+      "all-classes-header": "My Classes",
       "all-classes-sub":
-        "Click on a card below to enter class detail modes, check scripts, or review live shared materials.",
-      "weekly-schedule-header": "Weekly Timetable Layout",
-      "weekly-schedule-sub":
-        "Your structured curriculum planner for the active collegiate semester.",
+        "Tap a card to see the syllabus, exam info, and shared code snippets.",
+      "weekly-schedule-header": "Weekly Timetable",
+      "weekly-schedule-sub": "Your class schedule for this semester.",
       "reviews-header": "Anonymous Course Reviews",
       "reviews-sub":
-        "Submit honest course descriptions. Everything is verified strictly through local student ID sandboxing.",
-      "anon-lock-shield": "Strict Privacy Lock Active",
-      "feedback-form-title": "Write Class Feedback",
-      "rv-body-placeholder": "How was this class for you? Add details...",
+        "Share honest feedback about your classes. Posts are completely anonymous.",
+      "anon-lock-shield": "100% Anonymous",
+      "feedback-form-title": "Write a Review",
+      "rv-body-placeholder": "How was this class for you?",
       "reminder-card-title": "Don't Forget Today!",
-      "reminder-card-subtitle": "ITEMS TO BRING FOR TODAY'S CLASSES",
+      "reminder-card-subtitle": "THINGS TO BRING FOR TODAY'S CLASSES",
     },
     ja: {
-      "gate-label": "学籍番号を入力してください",
-      "task-input-placeholder": "新しいクイックタスク...",
-      "tasks-title": "緊急タスク",
-      "breadcrumb-workspace": "コレギエイト講義ポータル",
-      "today-classes-title": "本日の講義時間割",
-      "today-classes-subtitle": "今日の授業日程",
-      "view-grid-lbl": "週間の時間割を表示 ➔",
+      "gate-label": "学籍番号でログイン",
+      "gate-hint": "初期パスワードは学籍番号と同じです",
+      "task-input-placeholder": "新しいタスク...",
+      "tasks-title": "クイックタスク",
+      "breadcrumb-workspace": "学生ワークスペース",
+      "today-classes-title": "今日の授業",
+      "today-classes-subtitle": "本日の時間割",
+      "view-grid-lbl": "週間時間割を見る ➔",
       "click-tip-lbl":
-        "時間割ブロックを選択すると、講義詳細、シラバス、課題、コード共有等を表示できます。",
-      "events-card-title": "学内イベント最新情報",
+        "授業をタップすると、シラバスや試験情報、共有コードが見られます。",
+      "events-card-title": "キャンパスイベント",
 
-      "exams-card-title": "近日の試験一覧",
-      "all-classes-header": "履修授業一覧",
+      "exams-card-title": "近日の試験",
+      "all-classes-header": "履修中の授業",
       "all-classes-sub":
-        "ブロックを選択すると、コードスニペットの共有や実習生同士のリアルタイム通信が可能です。",
-      "weekly-schedule-header": "週間タイムテーブル",
-      "weekly-schedule-sub": "今期セメスターの曜日ごとの時間割一覧。",
-      "reviews-header": "匿名講義レビュー",
+        "カードをタップすると、シラバスや試験情報、共有コードが見られます。",
+      "weekly-schedule-header": "週間時間割",
+      "weekly-schedule-sub": "今学期の授業スケジュールです。",
+      "reviews-header": "匿名レビュー",
       "reviews-sub":
-        "他の学生のために講義の評価・感想を登録できます。登録は完全に匿名で保護されています。",
-      "anon-lock-shield": "匿名接続保護中",
-      "feedback-form-title": "新規レビュー投稿",
-      "rv-body-placeholder":
-        "課題量、単位取得難易度、授業内容の感想を書いてください...",
+        "授業の正直な感想をシェアしよう。投稿は完全に匿名です。",
+      "anon-lock-shield": "完全匿名",
+      "feedback-form-title": "レビューを書く",
+      "rv-body-placeholder": "この授業はどうでしたか？",
       "reminder-card-title": "今日の持ち物チェック！",
-      "reminder-card-subtitle": "本日の授業に必要な持ち物",
+      "reminder-card-subtitle": "今日の授業に必要な持ち物",
     },
   };
 
@@ -86,6 +86,7 @@ function toggleLang() {
   };
 
   setTxt("gate-label", s["gate-label"]);
+  setTxt("gate-hint", s["gate-hint"]);
   // Task input + title exist on both desktop and mobile
   document.querySelectorAll('[data-role="task-input"]').forEach((el) => {
     el.placeholder = s["task-input-placeholder"];

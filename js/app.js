@@ -45,7 +45,7 @@ function switchTab(workspaceId) {
 async function renderWeatherApplet() {
   const wCard = document.getElementById('weather-details-card');
   if (!navigator.geolocation) {
-    wCard.innerHTML = `<p class="text-xs font-semibold text-slate-400">GPS Blocked</p>`;
+    wCard.innerHTML = `<p class="text-xs font-semibold text-slate-400">Location unavailable</p>`;
     return;
   }
   navigator.geolocation.getCurrentPosition(async pos => {
@@ -77,7 +77,7 @@ async function renderWeatherApplet() {
         <span class="text-[9px] font-bold text-slate-400 block mt-1">💨 Wind: ${wind} km/h &bull; 💧 Hum: ${hum}%</span>
       `;
     } catch (e) {
-      wCard.innerHTML = `<p class="text-xs font-bold text-slate-400">API Fetch Error</p>`;
+      wCard.innerHTML = `<p class="text-xs font-bold text-slate-400">Weather unavailable</p>`;
     }
   }, () => {
     wCard.innerHTML = `

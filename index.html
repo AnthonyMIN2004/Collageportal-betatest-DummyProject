@@ -455,7 +455,7 @@
             <label
               class="text-slate-300 text-xs font-bold uppercase tracking-wider block mb-2 text-center"
               id="gate-label"
-              >学生番号</label
+              >学籍番号でログイン</label
             >
             <input
               type="text"
@@ -481,6 +481,12 @@
           >
             Enter Portal
           </button>
+          <p
+            id="gate-hint"
+            class="text-slate-500 text-[10px] font-bold text-center"
+          >
+            初期パスワードは学籍番号と同じです
+          </p>
           <div
             id="gate-error"
             class="text-rose-400 text-xs font-bold text-center h-4"
@@ -605,7 +611,7 @@
               <span
                 class="text-[10px] font-bold text-slate-400 tracking-wider uppercase block"
                 id="tasks-title"
-                >Urgent Tasks</span
+                >Quick Tasks</span
               >
               <span
                 class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-full"
@@ -765,9 +771,8 @@
                   <p
                     class="text-xs md:text-sm text-brand-100/90 font-medium leading-relaxed hidden sm:block"
                   >
-                    Here is your academic command center. Monitor your immediate
-                    schedule, check your daily bag checklist, or explore active
-                    collegiate events.
+                    Check today's classes, pack your bag with the checklist,
+                    and see what's happening on campus — all in one place.
                   </p>
                   <div
                     class="pt-1 md:pt-2 flex flex-wrap items-center gap-3 md:gap-4"
@@ -836,7 +841,7 @@
             >
               <div class="flex justify-between items-center mb-3">
                 <span class="text-xs font-black text-slate-700"
-                  >⚡ <span id="tasks-title-mobile">Urgent Tasks</span></span
+                  >⚡ <span id="tasks-title-mobile">Quick Tasks</span></span
                 >
                 <span
                   class="bg-slate-100 text-slate-600 text-[9px] font-black px-2 py-0.5 rounded-full"
@@ -880,13 +885,13 @@
                           class="font-extrabold text-slate-900 text-sm tracking-tight"
                           id="today-classes-title"
                         >
-                          Today's Class Schedule
+                          Today's Classes
                         </h3>
                         <p
                           class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
                           id="today-classes-subtitle"
                         >
-                          CORE DAILY PERIODS
+                          TODAY'S PERIODS
                         </p>
                       </div>
                     </div>
@@ -927,7 +932,7 @@
                           class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
                           id="reminder-card-subtitle"
                         >
-                          ITEMS TO BRING FOR TODAY'S CLASSES
+                          THINGS TO BRING FOR TODAY'S CLASSES
                         </p>
                       </div>
                     </div>
@@ -958,12 +963,12 @@
                         class="font-extrabold text-slate-900 text-sm tracking-tight"
                         id="events-card-title"
                       >
-                        Live Campus Events
+                        Campus Events
                       </h3>
                       <p
                         class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
                       >
-                        CURRENT NOTICES & HUBS
+                        CAMPUS NOTICES
                       </p>
                     </div>
                   </div>
@@ -986,7 +991,7 @@
                       <p
                         class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
                       >
-                        PREPARATION COUNTER
+                        EXAM COUNTDOWN
                       </p>
                     </div>
                   </div>
@@ -1007,13 +1012,13 @@
                   class="text-xl font-black text-slate-950"
                   id="all-classes-header"
                 >
-                  All Enrolled Classes
+                  My Classes
                 </h1>
                 <p
                   class="text-xs text-slate-400 font-semibold mt-1"
                   id="all-classes-sub"
                 >
-                  Click on a card below to enter class detail modes.
+                  Tap a card to see the syllabus, exam info, and shared code.
                 </p>
               </div>
               <div
@@ -1034,14 +1039,13 @@
                 class="text-xl font-black text-slate-950"
                 id="weekly-schedule-header"
               >
-                Weekly Timetable Layout
+                Weekly Timetable
               </h1>
               <p
                 class="text-xs text-slate-400 font-semibold mt-1"
                 id="weekly-schedule-sub"
               >
-                Your structured curriculum planner for the active collegiate
-                semester.
+                Your class schedule for this semester.
               </p>
             </div>
             <div
@@ -1075,7 +1079,7 @@
               <span
                 class="bg-brand-50 text-brand-600 text-xs font-black px-3 py-1.5 rounded-xl border border-brand-100 flex items-center gap-1.5 self-start"
               >
-                🔒 <span id="anon-lock-shield">Strict Privacy Lock Active</span>
+                🔒 <span id="anon-lock-shield">100% Anonymous</span>
               </span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
@@ -1086,12 +1090,14 @@
                   class="font-extrabold text-slate-950 text-sm"
                   id="feedback-form-title"
                 >
-                  Write Class Feedback
+                  Write a Review
                 </h3>
                 <div>
                   <label
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
-                    >Selected Subject</label
+                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5 lbl-txt"
+                    data-en="Class"
+                    data-ja="授業"
+                    >Class</label
                   >
                   <select
                     id="rv-class"
@@ -1101,7 +1107,9 @@
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label
-                      class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
+                      class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5 lbl-txt"
+                      data-en="Rating"
+                      data-ja="評価"
                       >Rating</label
                     >
                     <select
@@ -1111,13 +1119,15 @@
                       <option value="5">⭐⭐⭐⭐⭐ 最高</option>
                       <option value="4">⭐⭐⭐⭐ 良い</option>
                       <option value="3">⭐⭐⭐ 普通</option>
-                      <option value="2">⭐⭐ 難しい</option>
-                      <option value="1">⭐ きつい</option>
+                      <option value="2">⭐⭐ いまいち</option>
+                      <option value="1">⭐ うーん…</option>
                     </select>
                   </div>
                   <div>
                     <label
-                      class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
+                      class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5 lbl-txt"
+                      data-en="Difficulty"
+                      data-ja="難易度"
                       >Difficulty</label
                     >
                     <select
@@ -1132,12 +1142,14 @@
                 </div>
                 <div>
                   <label
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5"
+                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5 lbl-txt"
+                    data-en="Your Thoughts"
+                    data-ja="感想"
                     >Your Thoughts</label
                   >
                   <textarea
                     id="rv-body"
-                    placeholder="授業の感想を書いてください..."
+                    placeholder="この授業はどうでしたか？"
                     class="w-full p-3 rounded-xl border border-slate-200 outline-none text-xs font-bold text-slate-700 bg-slate-50 focus:border-brand-500 min-h-[120px] resize-y"
                   ></textarea>
                 </div>

@@ -142,23 +142,56 @@ function renderClassTabContent() {
 
   if (currentTab === 'info') {
     const exam = info.exam;
+    const canEdit = isAdmin && API.online;
+    const bringItems = CLASS_BRING_ITEMS[currentClass] || [];
+
+    // Admin: edit syllabus icon/text + manage the bring-items list.
+    // Everything saves straight to the server and re-renders.
+    const adminPanel = !canEdit ? '' : `
+      <div class="md:col-span-12 bg-white border border-brand-200 rounded-3xl p-6 shadow-sm space-y-4">
+        <h4 class="font-extrabold text-brand-600 text-sm">🛠️ ${lang === 'en' ? 'Edit Class (Admin)' : 'クラス編集（管理者）'}</h4>
+        <div class="flex gap-2">
+          <input type="text" id="ci-icon" value="${escHtml(info.icon || '📚')}" class="w-16 text-center text-base px-2 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 bg-slate-50">
+          <button onclick="adminSaveClassInfo()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-black text-xs transition-all ml-auto">${lang === 'en' ? 'Save' : '保存'}</button>
+        </div>
+        <textarea id="ci-desc" class="w-full p-3 rounded-xl border border-slate-200 outline-none text-xs font-semibold bg-slate-50 min-h-[80px] focus:border-brand-500">${escHtml(info.desc || '')}</textarea>
+        <div class="border-t border-slate-100 pt-3 space-y-2">
+          <h5 class="text-xs font-extrabold text-slate-900">🎒 ${lang === 'en' ? 'Things to Bring' : '持ち物リスト'}</h5>
+          <div class="flex flex-wrap gap-2">
+            ${bringItems.map(b => `
+              <span class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-[10px] font-bold text-slate-700">
+                ${escHtml(b.icon)} ${escHtml(b.item)}
+                ${b.id != null ? `<button onclick="adminDeleteBring(${b.id})" class="text-rose-400 hover:text-rose-600 font-black transition-all">✕</button>` : ''}
+              </span>
+            `).join('') || `<span class="text-[10px] font-bold text-slate-400">${lang === 'en' ? 'Nothing yet.' : 'まだありません。'}</span>`}
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="br-icon" placeholder="📓" class="w-14 text-center text-xs px-2 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 bg-slate-50/50">
+            <input type="text" id="br-item" placeholder="${lang === 'en' ? 'Item name' : '持ち物の名前'}" class="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+            <button onclick="adminAddBring()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-black text-xs transition-all">＋</button>
+          </div>
+        </div>
+      </div>
+    `;
+
     output.innerHTML = `
       <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div class="md:col-span-8 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm">
           <h4 class="font-extrabold text-slate-900 text-sm mb-3">${lang === 'en' ? 'Syllabus Description' : '講義概要'}</h4>
-          <p class="text-xs text-slate-600 font-semibold leading-relaxed">${info.desc || 'No syllabus uploaded.'}</p>
+          <p class="text-xs text-slate-600 font-semibold leading-relaxed">${escHtml(info.desc || '') || 'No syllabus uploaded.'}</p>
         </div>
         <div class="md:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm">
           <h4 class="font-extrabold text-slate-900 text-sm mb-3">${lang === 'en' ? 'Test Schedule' : '試験情報'}</h4>
           ${exam ? `
             <div class="space-y-3">
               <span class="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-2.5 py-1 rounded-lg inline-block uppercase">TEST ASSIGNED</span>
-              <h5 class="text-xs font-black text-slate-900">${exam.name}</h5>
-              <p class="text-[10px] text-slate-500 font-bold">📅 ${exam.date} &bull; Room ${exam.room}</p>
-              <p class="text-[10px] text-brand-600 font-extrabold">📝 ${exam.topics}</p>
+              <h5 class="text-xs font-black text-slate-900">${escHtml(exam.name)}</h5>
+              <p class="text-[10px] text-slate-500 font-bold">📅 ${exam.date} &bull; Room ${escHtml(exam.room || 'TBD')}</p>
+              <p class="text-[10px] text-brand-600 font-extrabold">📝 ${escHtml(exam.topics || '')}</p>
             </div>
           ` : `<p class="text-xs font-semibold text-slate-400 text-center py-4">No exam scheduled for this segment.</p>`}
         </div>
+        ${adminPanel}
       </div>
     `;
     return;
@@ -281,6 +314,54 @@ function renderLivePosts(posts) {
       <pre class="bg-[#1E1E2E] text-[#CDD6F4] font-mono text-xs p-3.5 rounded-xl border border-[#313244] overflow-x-auto">${escHtml(p.code)}</pre>
     </div>
   `).join('');
+}
+
+// ── Admin: class info + bring items editing ──
+async function adminSaveClassInfo() {
+  const icon = document.getElementById('ci-icon').value.trim() || '📚';
+  const desc = document.getElementById('ci-desc').value.trim();
+  try {
+    await apiFetch('/admin/classes/' + encodeURIComponent(currentClass), {
+      method: 'PUT',
+      body: JSON.stringify({ icon, desc }),
+    });
+    await refreshCurriculum();
+    showClassDetail(currentClass); // repaint the header + info tab
+    showToast(lang === 'en' ? '💾 Class info saved!' : '💾 クラス情報を保存しました！');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+async function adminAddBring() {
+  const icon = document.getElementById('br-icon').value.trim() || '📓';
+  const item = document.getElementById('br-item').value.trim();
+  if (!item) {
+    showToast(lang === 'en' ? '⚠️ Enter an item name.' : '⚠️ 持ち物の名前を入力してください。');
+    return;
+  }
+  try {
+    await apiFetch('/admin/bring', {
+      method: 'POST',
+      body: JSON.stringify({ class: currentClass, icon, item }),
+    });
+    await refreshCurriculum();
+    renderClassTabContent();
+    showToast(lang === 'en' ? '🎒 Item added!' : '🎒 持ち物を追加しました！');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+async function adminDeleteBring(id) {
+  try {
+    await apiFetch('/admin/bring/' + id, { method: 'DELETE' });
+    await refreshCurriculum();
+    renderClassTabContent();
+    showToast(lang === 'en' ? 'Item removed.' : '持ち物を削除しました。');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
 }
 
 // Pull this class's snippets from the server, then re-render if the

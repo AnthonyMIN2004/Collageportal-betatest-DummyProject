@@ -147,11 +147,15 @@ function updateNextClassTimer() {
 
 function renderFullSchedule() {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const canEdit = isAdmin && API.online;
+
   document.getElementById("full-schedule").innerHTML = days
     .map((day) => {
       const cls = SCHEDULE[day] || [];
       const isToday = day === TODAY;
-      if (!cls.length) return "";
+      // Admin sees every weekday (needs the empty ones to add classes);
+      // students only see days that have classes.
+      if (!cls.length && !(canEdit && day !== "Sat")) return "";
       const dayDisplay = isToday
         ? lang === "en"
           ? `${day} (Today)`
@@ -168,21 +172,80 @@ function renderFullSchedule() {
                   .map((c) => {
                     const p = PERIODS[c.period - 1];
                     return `
-              <div class="p-3 bg-slate-50 border border-slate-150 rounded-xl">
+              <div class="p-3 bg-slate-50 border border-slate-150 rounded-xl relative">
+                ${canEdit && c.id != null ? `<button onclick="adminDeleteMeeting(${c.id})" title="Remove from timetable" class="absolute top-2 right-2 text-rose-400 hover:text-rose-600 font-black text-xs px-1 transition-all">✕</button>` : ''}
                 <span class="text-[9px] font-black tracking-wide text-brand-600 block mb-0.5">${p.start} - ${p.end}</span>
-                <span class="text-xs font-black text-slate-800 block">${c.name}</span>
-                <span class="text-[9px] text-slate-400 font-bold block mt-0.5">📍 Room ${c.room} &bull; Period ${c.period}</span>
+                <span class="text-xs font-black text-slate-800 block">${escHtml(c.name)}</span>
+                <span class="text-[9px] text-slate-400 font-bold block mt-0.5">📍 Room ${escHtml(c.room)} &bull; Period ${c.period}</span>
               </div>
             `;
                   })
                   .join("")
               : `<p class="text-[10px] text-slate-400 font-bold text-center py-6 bg-slate-50/50 rounded-xl">No classes 🎉</p>`
           }
+          ${canEdit && day !== "Sat" ? `
+            <div class="border-t border-slate-100 pt-2 space-y-1.5">
+              <input type="text" id="mt-name-${day}" placeholder="${lang === 'en' ? 'Class name' : '講義名'}" class="w-full text-[10px] px-2.5 py-1.5 rounded-lg border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+              <div class="flex gap-1.5">
+                <select id="mt-period-${day}" class="flex-1 text-[10px] px-1.5 py-1.5 rounded-lg border border-slate-200 outline-none font-semibold bg-slate-50/50">
+                  ${PERIODS.map(p => `<option value="${p.num}">P${p.num} ${p.start}</option>`).join('')}
+                </select>
+                <input type="text" id="mt-room-${day}" placeholder="Room" class="w-14 text-[10px] px-2 py-1.5 rounded-lg border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+              </div>
+              <div class="flex gap-1.5">
+                <select id="mt-type-${day}" class="flex-1 text-[10px] px-1.5 py-1.5 rounded-lg border border-slate-200 outline-none font-semibold bg-slate-50/50">
+                  <option value="general">📚 Lecture</option>
+                  <option value="code">💻 Code</option>
+                  <option value="seminar">💡 Seminar</option>
+                  <option value="sport">⚽ Sport</option>
+                </select>
+                <button onclick="adminAddMeeting('${day}')" class="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-black text-[10px] transition-all">＋</button>
+              </div>
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
     })
     .join("");
+}
+
+async function adminAddMeeting(day) {
+  const name = document.getElementById('mt-name-' + day).value.trim();
+  const period = parseInt(document.getElementById('mt-period-' + day).value);
+  const room = document.getElementById('mt-room-' + day).value.trim() || 'TBD';
+  const type = document.getElementById('mt-type-' + day).value;
+  if (!name) {
+    showToast(lang === 'en' ? '⚠️ Enter a class name.' : '⚠️ 講義名を入力してください。');
+    return;
+  }
+  try {
+    await apiFetch('/admin/meetings', {
+      method: 'POST',
+      body: JSON.stringify({ day, period, name, room, type }),
+    });
+    await refreshCurriculum();
+    showToast(lang === 'en' ? '📅 Class added to the timetable!' : '📅 時間割に追加しました！');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+async function adminDeleteMeeting(id) {
+  const allow = await showCustomConfirm(
+    lang === 'en' ? 'Remove Class' : '授業を削除',
+    lang === 'en' ? 'Remove this class from the weekly timetable?' : 'この授業を時間割から削除しますか？',
+    lang === 'en' ? 'Remove' : '削除する',
+    lang === 'en' ? 'Cancel' : 'キャンセル'
+  );
+  if (!allow) return;
+  try {
+    await apiFetch('/admin/meetings/' + id, { method: 'DELETE' });
+    await refreshCurriculum();
+    showToast(lang === 'en' ? 'Class removed.' : '授業を削除しました。');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
 }
 
 function renderExams() {
@@ -204,18 +267,81 @@ function renderExams() {
           : "bg-blue-50 text-blue-600 border border-blue-100";
       const leftText = lang === "en" ? `${diff} days left` : `あと ${diff} 日`;
 
+      // stopPropagation: the ✕ sits inside a clickable card — without it
+      // deleting an exam would also open the class detail view
+      const deleteBtn = isAdmin && API.online && e.id != null
+        ? `<button onclick="event.stopPropagation(); adminDeleteExam(${e.id})" title="Delete exam" class="text-rose-400 hover:text-rose-600 font-black text-xs px-1.5 flex-shrink-0 transition-all">✕</button>`
+        : '';
+
       return `
       <div onclick="switchTab('classes'); showClassDetail('${e.name.replace(/'/g, "\\'")}')"
      class="p-3 bg-slate-50 border border-slate-200/50 rounded-2xl flex items-center justify-between gap-3 cursor-pointer hover:border-brand-500 hover:shadow-md transition-all">
         <div class="min-w-0">
-          <h4 class="text-xs font-black text-slate-800 truncate">${e.name}</h4>
-          <span class="text-[10px] text-slate-400 font-bold block mt-0.5">📅 ${e.date} &bull; Room ${e.room}</span>
+          <h4 class="text-xs font-black text-slate-800 truncate">${escHtml(e.name)}</h4>
+          <span class="text-[10px] text-slate-400 font-bold block mt-0.5">📅 ${e.date} &bull; Room ${escHtml(e.room || 'TBD')}</span>
         </div>
         <span class="px-2 py-1 text-[9px] font-black rounded-lg ${pillColor} flex-shrink-0">${leftText}</span>
+        ${deleteBtn}
       </div>
     `;
     })
     .join("");
+
+  // Admin: schedule a new exam (class picker keeps names consistent
+  // with the timetable, since exams join to classes by name)
+  if (isAdmin && API.online) {
+    list.innerHTML += `
+      <div class="border-t border-slate-100 pt-3 space-y-2">
+        <select id="ex-class" class="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+          ${ALL_CLASSES.map(n => `<option value="${escHtml(n)}">${escHtml(n)}</option>`).join('')}
+        </select>
+        <div class="flex gap-2">
+          <input type="date" id="ex-date" class="flex-1 min-w-0 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+          <input type="text" id="ex-room" placeholder="Room" class="w-20 text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+          <button onclick="adminAddExam()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-black text-xs transition-all">＋</button>
+        </div>
+        <input type="text" id="ex-topics" placeholder="${lang === 'en' ? 'Topics (optional)' : '出題範囲（任意）'}" class="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 font-semibold bg-slate-50/50">
+      </div>
+    `;
+  }
+}
+
+async function adminAddExam() {
+  const name = document.getElementById('ex-class').value;
+  const date = document.getElementById('ex-date').value;
+  const room = document.getElementById('ex-room').value.trim() || 'TBD';
+  const topics = document.getElementById('ex-topics').value.trim();
+  if (!date) {
+    showToast(lang === 'en' ? '⚠️ Pick an exam date.' : '⚠️ 試験日を選んでください。');
+    return;
+  }
+  try {
+    await apiFetch('/admin/exams', {
+      method: 'POST',
+      body: JSON.stringify({ name, date, room, topics }),
+    });
+    await refreshCurriculum();
+    showToast(lang === 'en' ? '📝 Exam scheduled!' : '📝 試験を登録しました！');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
+}
+
+async function adminDeleteExam(id) {
+  const allow = await showCustomConfirm(
+    lang === 'en' ? 'Delete Exam' : '試験を削除',
+    lang === 'en' ? 'Remove this exam from the countdown?' : 'この試験を削除しますか？',
+    lang === 'en' ? 'Delete' : '削除する',
+    lang === 'en' ? 'Cancel' : 'キャンセル'
+  );
+  if (!allow) return;
+  try {
+    await apiFetch('/admin/exams/' + id, { method: 'DELETE' });
+    await refreshCurriculum();
+    showToast(lang === 'en' ? 'Exam deleted.' : '試験を削除しました。');
+  } catch (e) {
+    showToast('⚠️ ' + e.message);
+  }
 }
 
 function renderEvents() {

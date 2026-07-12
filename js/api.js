@@ -62,6 +62,22 @@ async function syncFromServer() {
   EVENTS = mapEvents(events);
 }
 
+// After an admin curriculum edit (exam, timetable, class info):
+// re-pull everything from the server and repaint the widgets showing it.
+async function refreshCurriculum() {
+  await syncFromServer();
+  runSafe('mascot speech', renderMascotSpeech);
+  runSafe('today classes', renderTodayClasses);
+  runSafe('bring reminder', renderBringReminder);
+  runSafe('exams', renderExams);
+  runSafe('class grid', renderBlockGrid);
+  runSafe('full schedule', renderFullSchedule);
+  runSafe('review select', populateReviewSelect);
+  runSafe('class badge', () => {
+    document.getElementById('class-badge-count').textContent = ALL_CLASSES.length;
+  });
+}
+
 // Backend stores ISO dates; the events card wants "JUN / 20" style.
 // Keeps the id so admin can delete events from the dashboard.
 function mapEvents(events) {

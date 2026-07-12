@@ -1,3 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ── KIRITAN PORTAL | CSS ENTRY POINT ──
+   `npm run build:css` bundles everything below into style.css.
+   Add new feature styles as files under css/ and @import them here —
+   Tailwind's CLI inlines the imports, no extra build tools needed. */
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@import "./css/base.css";
+@import "./css/orb.css";

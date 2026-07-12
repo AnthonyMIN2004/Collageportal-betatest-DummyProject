@@ -1,0 +1,20 @@
+/* ── KIRITAN PORTAL | BASE STYLES ──
+   Small global styles that don't belong to any one feature.
+   Everything gets bundled into style.css by `npm run build:css`. */
+
+body {
+  background-color: #f8fafc;
+}
+
+/* Thin scrollbar for the sidebar lists */
+.custom-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}

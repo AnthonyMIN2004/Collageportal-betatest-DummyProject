@@ -5,7 +5,7 @@
 //   - /api/ requests  → never cached, they must be fresh
 // Bump CACHE_VERSION whenever you ship changes so old caches get purged.
 
-const CACHE_VERSION = 'kiritan-v1';
+const CACHE_VERSION = 'kiritan-v2';
 
 const SHELL_FILES = [
   './',

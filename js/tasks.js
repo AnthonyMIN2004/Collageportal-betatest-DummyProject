@@ -92,10 +92,10 @@ function renderQuickTasks() {
   const cardsHtml = quickTasks.map(task => `
     <div class="flex items-center justify-between gap-2 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200/60 transition-colors">
       <div class="flex items-center gap-2 min-w-0">
-        <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleQuickTask('${task.id}')" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 w-3 h-3">
+        <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleQuickTask('${task.id}')" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 w-4 h-4 cursor-pointer">
         <span class="text-[10px] font-bold ${task.done ? 'line-through text-slate-400' : 'text-slate-700'} truncate">${escHtml(task.text)}</span>
       </div>
-      <button onclick="deleteQuickTask('${task.id}')" class="text-slate-400 hover:text-rose-500 text-[10px] font-black leading-none p-1 transition-colors">✕</button>
+      <button onclick="deleteQuickTask('${task.id}')" aria-label="Delete task" class="text-slate-400 hover:text-rose-500 text-xs font-black leading-none p-2 -m-1 transition-colors">✕</button>
     </div>
   `).join('');
 

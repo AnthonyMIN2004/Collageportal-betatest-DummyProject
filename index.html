@@ -462,8 +462,17 @@
               inputmode="numeric"
               id="sid-input"
               pattern="[0-9]*"
-              placeholder="学生番号を入力してください"
+              placeholder="例: 25501"
               class="w-full text-center py-4 rounded-2xl bg-slate-800 border border-slate-700 text-white font-black text-2xl tracking-widest outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder:text-slate-600"
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              id="pw-input"
+              placeholder="パスワード"
+              autocomplete="current-password"
+              class="w-full text-center py-3.5 rounded-2xl bg-slate-800 border border-slate-700 text-white font-bold text-base tracking-widest outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder:text-slate-600"
             />
           </div>
           <button
@@ -1253,6 +1262,7 @@
     <!-- ── SCRIPTS (load order matters) ── -->
     <script src="js/data.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/lang.js"></script>
     <script src="js/tasks.js"></script>

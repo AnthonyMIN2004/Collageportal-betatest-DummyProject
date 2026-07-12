@@ -1,50 +1,88 @@
 // ── COLLEGIATE PORTAL | TASKS.JS ──
-// Quick tasks checklist. The same list is shown in two places
-// (desktop sidebar + mobile card), so we render into every element
-// tagged with data-role instead of relying on a single id.
+// Quick tasks checklist. Online → stored per student on the server
+// (/my/tasks). Offline → localStorage so the feature still works.
+// The list is shown in two places (desktop sidebar + mobile card),
+// so we render into every element tagged with data-role.
 
 let quickTasks = [];
 
-function loadQuickTasks() {
+async function loadQuickTasks() {
+  if (API.online) {
+    try {
+      const rows = await apiFetch('/my/tasks');
+      quickTasks = rows.map(r => ({ id: String(r.id), text: r.content, done: r.done }));
+      renderQuickTasks();
+      return;
+    } catch (e) {
+      console.warn('Tasks API failed, falling back to local:', e);
+    }
+  }
   const saved = localStorage.getItem('kiritan_dashboard_tasks');
   if (saved) {
     quickTasks = JSON.parse(saved);
   } else {
-    // First visit: give the student a few sample tasks so the card isn't empty
+    // First visit offline: a few sample tasks so the card isn't empty
     quickTasks = [
       { id: '1', text: 'Finish DX社会学 homework', done: false },
       { id: '2', text: 'Review Python API connection codes', done: false },
       { id: '3', text: 'Check campus open day guide', done: true }
     ];
-    saveQuickTasks();
   }
-}
-
-function saveQuickTasks() {
-  localStorage.setItem('kiritan_dashboard_tasks', JSON.stringify(quickTasks));
   renderQuickTasks();
 }
 
-function addQuickTask() {
+function saveQuickTasksLocal() {
+  if (!API.online) {
+    localStorage.setItem('kiritan_dashboard_tasks', JSON.stringify(quickTasks));
+  }
+}
+
+async function addQuickTask() {
   // Two inputs exist (desktop + mobile) — take whichever one has text
   const input = [...document.querySelectorAll('[data-role="task-input"]')]
     .find(i => i.value.trim());
   if (!input) return;
   const text = input.value.trim();
-  quickTasks.push({ id: Date.now().toString(), text, done: false });
   input.value = '';
-  saveQuickTasks();
+
+  if (API.online) {
+    try {
+      const res = await apiFetch('/my/tasks', {
+        method: 'POST',
+        body: JSON.stringify({ content: text }),
+      });
+      quickTasks.push({ id: String(res.id), text, done: false });
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return;
+    }
+  } else {
+    quickTasks.push({ id: Date.now().toString(), text, done: false });
+    saveQuickTasksLocal();
+  }
+  renderQuickTasks();
   showToast(lang === 'en' ? 'Task added!' : 'タスクを追加しました！');
 }
 
 function toggleQuickTask(id) {
+  // Update the UI right away, then tell the server in the background
   quickTasks = quickTasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
-  saveQuickTasks();
+  saveQuickTasksLocal();
+  renderQuickTasks();
+  if (API.online) {
+    apiFetch(`/my/tasks/${id}/toggle`, { method: 'POST' })
+      .catch(e => console.warn('Task toggle sync failed:', e));
+  }
 }
 
 function deleteQuickTask(id) {
   quickTasks = quickTasks.filter(t => t.id !== id);
-  saveQuickTasks();
+  saveQuickTasksLocal();
+  renderQuickTasks();
+  if (API.online) {
+    apiFetch(`/my/tasks/${id}`, { method: 'DELETE' })
+      .catch(e => console.warn('Task delete sync failed:', e));
+  }
   showToast(lang === 'en' ? 'Task deleted.' : 'タスクを削除しました。');
 }
 

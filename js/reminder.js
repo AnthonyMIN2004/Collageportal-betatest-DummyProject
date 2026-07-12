@@ -1,5 +1,21 @@
 // ── COLLEGIATE PORTAL | REMINDER.JS ──
-// "Don't Forget Today!" bring items reminder feature
+// "Don't Forget Today!" bring items checklist.
+// Checked state renders from sessionStorage (fast, works offline);
+// when online it also syncs with /my/checklist so it follows the
+// student across devices.
+
+async function syncChecklistFromServer() {
+  if (!API.online) return;
+  try {
+    const rows = await apiFetch('/my/checklist?day=' + TODAY);
+    const storageKey = `kiritan_reminder_${new Date().toDateString()}`;
+    const checked = rows.filter(r => r.checked).map(r => r.item);
+    sessionStorage.setItem(storageKey, JSON.stringify(checked));
+    renderBringReminder();
+  } catch (e) {
+    console.warn('Checklist sync failed, using local state:', e);
+  }
+}
 
 function renderBringReminder() {
   const container = document.getElementById('bring-reminder-container');
@@ -138,13 +154,24 @@ function toggleReminderItem(itemName) {
   const storageKey = `kiritan_reminder_${new Date().toDateString()}`;
   let checkedItems = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
 
+  let nowChecked;
   if (checkedItems.includes(itemName)) {
     checkedItems = checkedItems.filter(i => i !== itemName);
+    nowChecked = false;
   } else {
     checkedItems.push(itemName);
+    nowChecked = true;
     showToast(lang === 'en' ? `✓ ${itemName} packed!` : `✓ ${itemName} チェック！`);
   }
 
   sessionStorage.setItem(storageKey, JSON.stringify(checkedItems));
   renderBringReminder();
+
+  // Mirror to the server in the background (fine if it fails — local wins)
+  if (API.online) {
+    apiFetch('/my/checklist', {
+      method: 'POST',
+      body: JSON.stringify({ item: itemName, day: TODAY, checked: nowChecked }),
+    }).catch(e => console.warn('Checklist save failed:', e));
+  }
 }

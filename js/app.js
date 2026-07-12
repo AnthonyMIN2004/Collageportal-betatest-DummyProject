@@ -108,6 +108,8 @@ function runSafe(label, fn) {
 function init() {
   runSafe('local database', loadLocalDatabase);
   runSafe('quick tasks', loadQuickTasks);
+  runSafe('reviews load', loadReviews);
+  runSafe('checklist sync', syncChecklistFromServer);
   runSafe('clock', runRealTimeClock);
   runSafe('greeting', updateGreeting);
   runSafe('review select', populateReviewSelect);
@@ -129,6 +131,19 @@ function init() {
   if (typeof initOrbs === 'function') runSafe('mascot orbs', initOrbs);
 }
 
+// Session restored by auth.js (reload with a live session).
+// Online: pull fresh data from the server first; if the token went
+// stale or the server is down, quietly fall back to offline mode.
 if (studentId) {
-  init();
+  (async () => {
+    if (API.online) {
+      try {
+        await syncFromServer();
+      } catch (e) {
+        console.warn('Session sync failed, switching to offline mode:', e);
+        API.online = false;
+      }
+    }
+    init();
+  })();
 }

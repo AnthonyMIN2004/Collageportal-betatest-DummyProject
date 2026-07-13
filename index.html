@@ -1,4 +1,9 @@
 <!doctype html>
+<!--
+  きりたんカレッジポータル - メインHTML
+  画面は全部この1ファイル。タブ切替はJS側で .ws-view をON/OFFしてるだけ。
+  構成: モーダル → ログインゲート → サイドバー → メイン画面 → モバイルナビ → スクリプト読込
+-->
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
@@ -28,7 +33,10 @@
   <body
     class="min-h-screen text-slate-800 font-sans antialiased selection:bg-brand-100 selection:text-brand-600"
   >
-    <!-- ── MODAL OVERLAYS ── -->
+    <!-- ── MODAL OVERLAYS ──
+         ブラウザ標準のalert()/confirm()はダサいので自作した。
+         普段は opacity-0 + pointer-events-none で隠しておいて、
+         utils.js の showCustomAlert / showCustomConfirm がクラスを付け替えて表示する。 -->
     <div
       id="custom-alert-overlay"
       class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300"
@@ -107,7 +115,9 @@
       </div>
     </div>
 
-    <!-- Password change (+ admin reset) modal. Hidden until opened from the sidebar. -->
+    <!-- パスワード変更モーダル。サイドバー(スマホはヘッダー)の🔑から開く。
+         学生も管理者も自分のパスワードはここで変更。
+         下の pw-admin-reset ブロックは管理者ログイン時だけ表示される(リセット用)。 -->
     <div
       id="pw-modal"
       class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
@@ -192,7 +202,9 @@
       class="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] flex flex-col gap-2 pointer-events-none max-w-xs sm:max-w-md w-full px-4"
     ></div>
 
-    <!-- ── LOGIN GATE ── -->
+    <!-- ── LOGIN GATE ──
+         最初に必ず出る画面。auth.js の login() が成功したら #gate に hidden を付けて
+         下のメインアプリが見えるようになる仕組み。ログイン処理そのものはJS側。 -->
     <div
       id="gate"
       class="fixed inset-0 bg-slate-950 z-[9999] flex flex-col items-center justify-center p-6"
@@ -286,7 +298,9 @@
     <div
       class="min-h-screen flex flex-col lg:flex-row max-w-[1440px] mx-auto bg-[#F8FAFC] relative"
     >
-      <!-- ── SIDEBAR (desktop only) ── -->
+      <!-- ── SIDEBAR (desktop only) ──
+           lg以上でだけ表示。スマホは下の MOBILE BOTTOM NAV が代わり。
+           ナビの見た目切替(active色)は app.js の switchTab() がやってる。 -->
       <aside
         class="hidden lg:flex lg:w-[280px] bg-white border-r border-slate-200/80 flex-col sticky top-0 h-screen z-50 p-6"
       >
@@ -573,7 +587,10 @@
           </div>
         </header>
 
-        <!-- ── CONTENT PANELS ── -->
+        <!-- ── CONTENT PANELS ──
+             タブの中身は4枚のsection(.ws-view)。ws-home / ws-classes / ws-schedule / ws-reviews。
+             switchTab()が全部に hidden を付けてから対象だけ block にする、単純なSPAもどき。
+             中身のリストやカードはほぼJSが innerHTML で描画するので、ここは器だけ。 -->
         <div class="flex-1 p-4 md:p-6 overflow-y-auto max-w-full pb-24 lg:pb-6">
           <!-- 1. HOME DASHBOARD -->
           <section id="ws-home" class="ws-view space-y-4 md:space-y-6 block">
@@ -996,7 +1013,9 @@
       </main>
     </div>
 
-    <!-- ── MOBILE BOTTOM NAV ── -->
+    <!-- ── MOBILE BOTTOM NAV ──
+         スマホ用の下タブ。lg:hidden なのでPCでは出ない。
+         メインコンテンツ側に pb-24 を入れてこのバーとの重なりを回避してる。 -->
     <nav
       class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 flex items-center justify-around z-50 safe-area-inset-bottom"
       style="padding: 8px 0 max(8px, env(safe-area-inset-bottom))"
@@ -1111,21 +1130,27 @@
       </div>
     </div>
 
-    <!-- ── SCRIPTS (load order matters) ── -->
-    <script src="js/data.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/lang.js"></script>
-    <script src="js/tasks.js"></script>
-    <script src="js/reminder.js"></script>
-    <script src="js/schedule.js"></script>
-    <script src="js/classes.js"></script>
-    <script src="js/reviews.js"></script>
-    <script src="js/orb.js"></script>
-    <script src="js/app.js"></script>
+    <!-- ── SCRIPTS (load order matters!!) ──
+         バンドラー無しで<script>を上から順に読む方式。順番を変えると壊れるので注意。
+         ルール: みんなが使うもの(data/utils)が先、起動役(app.js)が最後。
+         おまけ: 1ファイルが構文エラーで死んでもそのファイルだけ止まって、
+         残りのタブは動き続ける。素朴だけど意外と頑丈。 -->
+    <script src="js/data.js"></script>      <!-- オフライン用のサンプルデータ(グローバル定数) -->
+    <script src="js/utils.js"></script>     <!-- 共通ヘルパー。escHtml とか toast とか -->
+    <script src="js/api.js"></script>       <!-- バックエンドとの通信係。API_BASE決定もここ -->
+    <script src="js/auth.js"></script>      <!-- ログイン・パスワード変更 -->
+    <script src="js/lang.js"></script>      <!-- 日英切替 -->
+    <script src="js/tasks.js"></script>     <!-- クイックタスク -->
+    <script src="js/reminder.js"></script>  <!-- 持ち物チェックリスト -->
+    <script src="js/schedule.js"></script>  <!-- 時間割・試験・イベント -->
+    <script src="js/classes.js"></script>   <!-- クラス詳細・スニペット・ライブ -->
+    <script src="js/reviews.js"></script>   <!-- 匿名レビュー -->
+    <script src="js/orb.js"></script>       <!-- きりたん(マスコット) -->
+    <script src="js/app.js"></script>       <!-- 最後に全員を起動する係 -->
     <script>
-      // Register the service worker (needs http(s), skipped on file://)
+      // Service Workerの登録。PWAのインストールとオフラインキャッシュに必要。
+      // file:// で直接開いた時はSW自体が使えないのでスキップする(エラー防止)。
+      // 失敗してもアプリは普通に動くから catch はログだけでOK。
       if ('serviceWorker' in navigator && location.protocol !== 'file:') {
         navigator.serviceWorker
           .register('sw.js')

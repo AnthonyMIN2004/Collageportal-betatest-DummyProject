@@ -20,20 +20,25 @@ async function login() {
   }
 
   try {
+    // まず本物のバックエンドにログインを試す
     const res = await apiFetch('/login', {
       method: 'POST',
       body: JSON.stringify({ student_id: sid, password: pw }),
     });
+    // 成功したらトークンを保持。sessionStorageなのでタブを閉じたら消える
+    // (localStorageにしないのはわざと。共用PCでログインしっぱなし防止)
     API.token = res.token;
     API.online = true;
     isAdmin = res.is_admin;
     sessionStorage.setItem('kiritan_token', res.token);
-    // UI hint only — the server checks the token itself on every admin call
+    // ↓これはUI表示用のヒントでしかない。本当の管理者チェックは
+    //   サーバーがトークンの中身で毎回やるので、ここを書き換えても何もできない
     sessionStorage.setItem('kiritan_admin', res.is_admin ? '1' : '');
     await enterPortal(res.student_id);
   } catch (e) {
-    // TypeError from fetch = network problem (server down) → offline mode.
-    // Anything else is a real rejection from the server (wrong password etc).
+    // エラーの種類で分岐するのがこの関数のキモ:
+    //   TypeError = fetch自体が失敗 = サーバーに届いてない(電源OFF等) → オフラインモードへ
+    //   それ以外 = サーバーはちゃんと動いてて断られた(パスワード違い等) → エラー表示
     if (e instanceof TypeError) {
       if (VALID.includes(sid)) {
         API.online = false;
@@ -70,7 +75,9 @@ function logout() {
   location.reload();
 }
 
-// ── Password change modal ──
+// ── パスワード変更モーダル ──
+// 開く前に毎回フィールドを空にする(前回の入力が残ってると事故るので)。
+// 管理者の時だけリセット用セクションを表示する。
 function openPasswordModal() {
   if (!API.online) {
     showCustomAlert(
@@ -138,7 +145,9 @@ async function adminResetPassword() {
   });
 });
 
-// Session restore: token (online) or saved id (offline) survives reload
+// リロードしてもログインが消えないようにするセッション復元。
+// トークンがあればオンライン復帰、無ければオフラインの保存IDで復帰。
+// isAdminもここで復元する(昔ここを忘れててリロードで管理者ボタンが消えるバグを出した…)
 const savedSid = sessionStorage.getItem('kiritan_sid');
 if (savedSid && (API.token || VALID.includes(savedSid))) {
   API.online = !!API.token;

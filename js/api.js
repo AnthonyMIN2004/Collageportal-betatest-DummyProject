@@ -23,21 +23,28 @@ const API = {
   token: sessionStorage.getItem('kiritan_token') || null,
 };
 
-// All backend calls go through here: adds the JWT header, parses JSON,
-// and turns HTTP errors into thrown Errors with the server's message.
+// バックエンド通信は全部この関数を通す。fetchを直接呼ばないのがルール。
+// やってくれること:
+//   ① Content-Type: application/json を毎回付ける
+//   ② ログイン済みなら Authorization: Bearer <token> を自動で付ける
+//   ③ エラーレスポンス(4xx/5xx)はサーバーのdetailメッセージ付きでthrowする
+// なので呼ぶ側は try/catch して e.message を表示するだけでよい。楽。
 async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (API.token) headers['Authorization'] = 'Bearer ' + API.token;
   const res = await fetch(API_BASE + path, { ...options, headers });
   if (!res.ok) {
+    // res.json()が失敗する場合もある(HTMLエラーページ等)ので catch で空オブジェクトに
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || `API error ${res.status}`);
   }
   return res.json();
 }
 
-// Pull the real curriculum from the server and replace the local
-// fallback constants (declared in js/data.js). Called once after login.
+// ログイン成功後に1回呼ばれる同期処理。
+// data.jsのサンプル定数(SCHEDULE, CLASS_INFO...)をサーバーの本物データで上書きする。
+// ※data.js側の変数が const じゃなくて let なのはこの上書きのため。消さないこと！
+// Promise.allで3本同時に取りに行く(直列だと遅いので)。
 async function syncFromServer() {
   const [sched, classes, events] = await Promise.all([
     apiFetch('/my/schedule'),

@@ -17,8 +17,11 @@ function getStatus(s, e) {
   return n > em ? 'done' : n >= sm ? 'now' : 'upcoming';
 }
 
+// XSS対策の要。innerHTMLに流し込むユーザー入力は必ずこれを通すこと！
+// レビュー本文とかスニペットのコードとか、他人が書いた文字列は全部対象。
+// &を最初に変換するのは順番が大事だから(後にやると&lt;の&まで二重変換される)。
+// "も変換するのは value="..." 属性の中に入れる場面があるため。
 function escHtml(s) {
-  // Quotes matter too — this output also lands inside value="..." attributes
   return String(s ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -33,7 +36,11 @@ function timeAgo(ts) {
   return lang === 'en' ? Math.floor(diffSec / 3600) + 'h ago' : Math.floor(diffSec / 3600) + '時間前';
 }
 
-// ── CUSTOM IN-APP DIALOG SYSTEM ──
+// ── 自作ダイアログシステム ──
+// confirm()の代わり。ポイントはPromiseを返すところ:
+//   const ok = await showCustomConfirm(...) と書けるので、
+//   「OKを待ってから続きをやる」処理が自然に書ける。
+// resolveを外の変数に逃がしておいて、ボタンクリック時に呼ぶ仕掛け。
 let confirmPromiseResolve = null;
 
 function showCustomAlert(title, message) {
@@ -81,6 +88,9 @@ function resolveCustomConfirm(value) {
   }
 }
 
+// 上からぴょこっと出る通知。2.5秒表示→フェードアウト→DOMから削除。
+// 遷移が終わるのを待ってからremove()しないとアニメーションが切れるので
+// setTimeoutが2段になってる。
 function showToast(message) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -93,6 +103,9 @@ function showToast(message) {
   }, 2500);
 }
 
+// クリップボードコピー。navigator.clipboardはhttps必須なので、
+// http環境(開発中のLAN)でも動く古典的なtextarea+execCommand方式を使ってる。
+// deprecatedなのは知ってるけど、動くものは動く。Pi移行後に書き換え検討。
 function safeCopyToClipboard(text) {
   try {
     const area = document.createElement('textarea');

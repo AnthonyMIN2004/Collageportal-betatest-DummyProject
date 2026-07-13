@@ -13,3 +13,23 @@ backend/portal.db
 
 # Env / secrets
 .env
+
+# AI/エディタ系ツールが勝手に作る設定フォルダ。プロジェクト本体とは無関係
+.agents/
+.augment/
+.claude/
+.codebuddy/
+.codex/
+.continue/
+.cursor/
+.factory/
+.gemini/
+.github/instructions/
+.kilocode/
+.kiro/
+.opencode/
+.qoder/
+.roo/
+.trae/
+.warp/
+.windsurf/

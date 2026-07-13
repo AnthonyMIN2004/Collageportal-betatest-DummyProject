@@ -8,11 +8,15 @@ let currentTab = 'info';
 let snippets = {};
 let reviews = [];
 
-// Live session state for the currently open class (online mode).
-// The Live tab polls the server every few seconds while it's open.
+// ライブセッションの状態(今開いてるクラスの分だけ)。
+// Liveタブを開いてる間、5秒おきにサーバーへ取りに行く「ポーリング」方式。
+// WebSocketにしなかった理由: この規模なら5秒ポーリングで十分だし、
+// Nginxの設定もサーバーのコードもずっと単純に済むから。
 let liveState = { active: false, posts: [] };
 let livePoll = null;
 
+// ポーリング停止。タブを離れる時・クラス詳細を閉じる時に必ず呼ぶこと。
+// これを忘れるとタイマーが増殖して裏で無限にAPIを叩き続ける(こわい)
 function stopLivePoll() {
   if (livePoll) {
     clearInterval(livePoll);
@@ -20,6 +24,8 @@ function stopLivePoll() {
   }
 }
 
+// オフライン時のデータ置き場はlocalStorage。
+// オンライン時はサーバーから取るのでここは初期値になるだけ。
 function loadLocalDatabase() {
   const sn = localStorage.getItem('kiritan_snippets');
   const rv = localStorage.getItem('kiritan_reviews');
@@ -379,8 +385,12 @@ async function loadSnippets() {
   }
 }
 
-// Fetch live session state. rerender=false is the polling path: it only
-// swaps the feed contents so we don't wipe a half-typed textarea.
+// ライブの状態をサーバーから取得。引数rerenderの意味が大事:
+//   rerender=true  … タブを開いた直後。画面まるごと描き直してOK
+//   rerender=false … ポーリング(5秒おき)の時。まるごと描き直すと
+//                    入力途中のtextareaまで消えてしまう(やらかした)ので、
+//                    フィード部分のinnerHTMLだけ差し替える
+// ただしactiveがfalse→trueに変わった時(誰かが開始した)は全体を描き直す。
 async function loadLive(rerender = true) {
   if (!API.online || !currentClass) return;
   try {

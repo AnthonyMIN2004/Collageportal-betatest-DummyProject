@@ -1,9 +1,17 @@
 // ── KIRITAN PORTAL | SERVICE WORKER ──
-// Makes the portal installable and lets the app shell load instantly
-// (and offline). Strategy:
-//   - app shell files → cache-first, refreshed in the background
-//   - /api/ requests  → never cached, they must be fresh
-// Bump CACHE_VERSION whenever you ship changes so old caches get purged.
+// PWAの心臓部。これがあるとホーム画面にインストールできて、オフラインでも開ける。
+//
+// 戦略(stale-while-revalidate):
+//   - 画面のファイル → まずキャッシュから即返す。裏で新しいのを取りに行って次回用に保存
+//   - /api/ → 絶対キャッシュしない。データは常に最新じゃないと意味がない
+//
+// ⚠️ 運用ルール: フロントのファイルを変更したら CACHE_VERSION を必ず上げること！
+// 上げ忘れると学生のスマホに古い画面が残り続ける。
+//
+// 教訓メモ(v3で2時間溶かした): SWのfetchは素直に書くとブラウザのHTTPキャッシュを
+// 経由する。するとサーバーが304を返してきて「古いファイルを新しいキャッシュに保存」
+// という最悪の事態が起きる。下でcache:'reload'/'no-cache'を指定してるのはそのため。
+// 絶対に消さないこと。未来の自分へ。
 
 const CACHE_VERSION = 'kiritan-v4';
 
@@ -40,7 +48,8 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  // Delete caches from older versions
+  // 古いバージョンのキャッシュを掃除する。kiritan-v3とかが残ってたら全部削除。
+  // clients.claim()で開いてるタブの制御も即座に引き継ぐ(リロード1回分早くなる)
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))

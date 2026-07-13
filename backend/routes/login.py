@@ -13,13 +13,17 @@ from database import get_db
 
 router = APIRouter()
 
-# Rate limit: max attempts per IP within the window.
+# レート制限: 同じIPから5分間に5回失敗したらしばらくお断り。
+# パスワード総当たり(ブルートフォース)を遅くするのが目的。
+# メモリ上のdictで管理してるので再起動でリセットされるが、この規模なら十分。
+# (サーバーを複数台にするならRedis等に移す必要あり — 今は1台なのでYAGNI)
 MAX_ATTEMPTS = 5
 WINDOW_SECONDS = 300
 _attempts: dict[str, list[float]] = {}
 
 
 def _rate_limited(ip: str) -> bool:
+    # 窓(5分)より古い記録は毎回捨てる。これでdictが無限に育たない
     now = time.time()
     hits = [t for t in _attempts.get(ip, []) if now - t < WINDOW_SECONDS]
     _attempts[ip] = hits
@@ -48,6 +52,8 @@ def login(body: LoginBody, request: Request):
     ).fetchone()
     conn.close()
 
+    # 「IDが存在しない」と「パスワードが違う」を同じエラー文にしてるのはわざと。
+    # 分けると攻撃者に「このIDは存在する」というヒントを与えてしまうため。
     if not row or not auth.verify_password(body.password, row["password_hash"]):
         _record_attempt(ip)
         raise HTTPException(status_code=401, detail="学籍番号またはパスワードが正しくありません")

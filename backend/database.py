@@ -1,7 +1,12 @@
 # ── COLLEGIATE PORTAL | DATABASE.PY ──
-# SQLite setup: connection helper, table creation, and seeding.
-# SECURITY: every query in the app uses parameterized (?) placeholders —
-# never string-formatted SQL — so user input can't inject.
+# SQLiteの土台: 接続ヘルパー・テーブル作成・初期データ投入。
+#
+# SQLiteを選んだ理由: サーバー1台(Pi)・学生10人規模なら、これで全然足りる。
+# ファイル1個(portal.db)がDB本体なので、バックアップ = ファイルコピーで済むのも楽。
+#
+# ⚠️ セキュリティの絶対ルール: SQLは必ず「?」プレースホルダーで書く。
+# f文字列や+でSQLを組み立てるとSQLインジェクションで一発アウト。
+# このプロジェクトの全クエリは ? 方式で統一してある。守って。
 
 import os
 import sqlite3
@@ -14,7 +19,11 @@ DB_PATH = os.environ.get("PORTAL_DB", os.path.join(os.path.dirname(__file__), "p
 
 
 def get_db():
-    """Open a connection with row access by column name. Caller closes it."""
+    """接続を開いて返す。閉じるのは呼んだ側の責任(closeを忘れずに)。
+
+    row_factory = sqlite3.Row にしておくと row["name"] みたいに
+    カラム名でアクセスできる(デフォルトはタプルで row[0] とかになって読めない)。
+    foreign_keys = ON はSQLiteだとデフォルトOFFという罠があるので毎回明示。"""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")

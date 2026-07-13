@@ -1,8 +1,17 @@
 /* ── KIRITAN PORTAL | GLASS ORB (mascot) ──
-   The animated glass sphere that Kiritan lives in. Used in four sizes:
-   default (modal 340px), .orb-md (login gate), .orb-sm (banner),
-   .orb-xs (floating button). The eyes are drawn on a <canvas>
-   by js/orb.js — this file is only the sphere + glow.  */
+   きりたんが住んでるガラス玉のCSS。正直ここは一番凝った(凝りすぎた)部分なので
+   レイヤー構造をメモしておく。仕組みが分かれば怖くない:
+
+     z-index 1: ::before      … ベースの暖色グラデ(オレンジ→紫)
+     z-index 2: ::after       … 青いブロブ。blobDriftでゆらゆら動く
+     z-index 3: .orb-inner1   … 紫のブロブ。別のリズム(blobDrift2)で動く
+     z-index 4: .orb-inner2   … 内側の影。玉に「奥行き」を出す係
+     z-index 5: .orb-gloss    … ガラスのテカリ(白いハイライト)
+     z-index 6: .orb-ring     … フチの細いリング
+     z-index 10: canvas       … 目。これだけjs/orb.jsが描いてる
+
+   サイズは4種類: デフォルト(モーダル340px) / .orb-md(ログイン画面) /
+   .orb-sm(バナー) / .orb-xs(右下のボタン)。 */
 
 .orb-scene {
   position: relative;
@@ -71,8 +80,11 @@
   }
 }
 
-/* The sphere itself: layered radial gradients that slowly drift,
-   morph and spin so it feels alive */
+/* 玉本体。アニメーションを3つ同時にかけてるのがポイント:
+     morph   … border-radiusを歪ませて「ぷにぷに」させる(9秒)
+     spin    … 全体をゆっくり回転(22秒) → 中のブロブも一緒に回る
+     breathe … ちょっと拡大縮小して「呼吸」(4秒)
+   周期をわざと全部バラバラにしてるので、同じ見た目が二度と来ない。生きてる感。 */
 .orb-sphere {
   position: relative;
   width: 280px;
@@ -205,6 +217,11 @@
     );
 }
 
+/* フチのリング。ここのmaskトリックは正直むずかしいので丁寧にメモ:
+   グラデーションのborderを直接は作れないため、
+   ①borderを透明にして背景グラデをborder-boxまで広げる
+   ②maskで「padding部分をくり抜く」→ border部分だけグラデが残る
+   という手品。mask-composite: exclude がくり抜き役。 */
 .orb-sphere .orb-ring {
   position: absolute;
   inset: 0;

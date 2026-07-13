@@ -1,6 +1,6 @@
 /* ── KIRITAN PORTAL | BASE STYLES ──
-   Small global styles that don't belong to any one feature.
-   Everything gets bundled into style.css by `npm run build:css`. */
+   どの機能にも属さない全体系の細かいスタイル置き場。
+   ここを編集したら `npm run build:css` を忘れずに(style.cssは生成物、直接触らない)。 */
 
 body {
   background-color: #f8fafc;
@@ -16,8 +16,8 @@ textarea,
   touch-action: manipulation;
 }
 
-/* iOS Safari auto-zooms into inputs smaller than 16px — keep form
-   controls at 16px on phones so the page doesn't jump around */
+/* iOS Safariの仕様: 16px未満のinputにフォーカスすると勝手にズームされる。
+   スマホだけフォームを16pxに固定して画面ガタガタ問題を回避。実機で気づいたやつ */
 @media (max-width: 767px) {
   input,
   select,

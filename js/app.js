@@ -1,7 +1,9 @@
 // ── COLLEGIATE PORTAL | APP.JS ──
 // Tab controller, weather applet, app initialization
 
-// ── TAB CONTROLLER ──
+// ── タブ切替 ──
+// SPAもどきの心臓部。全部の.ws-viewを隠してから目的のやつだけ表示。
+// ついでにサイドバーとモバイルナビのactive色も付け替える。
 function switchTab(workspaceId) {
   document.querySelectorAll('.ws-view').forEach(view => {
     view.classList.add('hidden');
@@ -94,9 +96,11 @@ async function renderWeatherApplet() {
   });
 }
 
-// ── APP INITIALIZATION ──
-// Each feature initializes inside its own try/catch, so if one widget
-// throws (bad data, missing element...) the rest of the portal still works.
+// ── アプリ起動 ──
+// runSafe = 起動処理の防護壁。各ウィジェットを個別のtry/catchで包むことで、
+// 1つが例外を吐いても(データ不正・要素が無い等)残りは普通に起動する。
+// 「時計が壊れたせいでログインすらできない」みたいな全滅事故を防ぐのが狙い。
+// 失敗はconsoleにラベル付きで出るので、どれが死んだかは一目で分かる。
 function runSafe(label, fn) {
   try {
     fn();

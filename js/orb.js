@@ -1,11 +1,16 @@
 // ── COLLEGIATE PORTAL | ORB.JS ──
-// Glass orb mascot rendering (canvas eyes) and modal control
+// きりたんの「目」を描く担当。玉本体はCSS(css/orb.css)、目だけcanvas。
+// CSSで目をやらなかった理由: まばたきの細かいタイミング制御はJSの方が圧倒的に楽。
 
+// 目を1セット作ってアニメーションを回す。canvasのIDとサイズを渡すだけで動くので
+// バナー/ログイン画面/モーダル/ボタンの4箇所で使い回してる。
 function makeEyes(canvasId, size) {
   const c = document.getElementById(canvasId);
-  if (!c) return;
+  if (!c) return; // その画面にcanvasが無ければ何もしない(安全策)
   const ctx = c.getContext('2d');
+  // R=目の配置半径。0.464は「玉の中でいい感じの位置」になるまで調整した値
   const S = size, cx = size / 2, cy = size / 2, R = size * 0.464;
+  // nextBlink: 次のまばたきまでの秒数。乱数にすることで機械っぽさを消す
   let t = 0, blinkT = 0, nextBlink = 3 + Math.random() * 4;
 
   function pill(x, y, w, h, r) {
@@ -26,7 +31,10 @@ function makeEyes(canvasId, size) {
     t = ts / 1000;
     ctx.clearRect(0, 0, S, S);
 
-    // blink
+    // まばたき処理。sy = 目の縦スケール(1=開き切り、0.04=ほぼ閉じ)。
+    // タイムライン: 0.09秒で閉じる → 0.06秒閉じたまま → 0.1秒で開く。
+    // 人間のまばたきは閉じる方が速いので、閉じ/開きの秒数を非対称にしてある。
+    // 終わったら次のまばたき時刻をまた乱数で決める(2〜7秒後)。
     blinkT += 1 / 60;
     let sy = 1;
     if (blinkT > nextBlink) {
@@ -77,7 +85,7 @@ function makeEyes(canvasId, size) {
       ctx.restore();
     });
 
-    // blush
+    // ほっぺの赤み。sinでゆっくり濃さを揺らすと「生きてる」感じになる
     const ba = 0.15 + Math.sin(t * 0.4) * 0.04;
     [-1, 1].forEach(side => {
       const bx = cx + side * (gap / 2 + ew * 1.1);
@@ -110,7 +118,8 @@ function initGateOrb() {
   makeEyes('gate-eyes', 110);
 }
 
-// Modal open/close — init modal canvas lazily on first open
+// モーダルの目は「初めて開いた時」に作る(遅延初期化)。
+// 最初から作ると、見てもいないcanvasのアニメが裏で回り続けて無駄なので。
 let modalOrbStarted = false;
 function openOrbModal() {
   const overlay = document.getElementById('orb-modal');
